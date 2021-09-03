@@ -1,0 +1,8 @@
+/home/toufik/.src/CsharpInterp/Interpreter/bin/Debug/netstandard2.0/Interpreter.deps.json
+/home/toufik/.src/CsharpInterp/Interpreter/bin/Debug/netstandard2.0/Interpreter.dll
+/home/toufik/.src/CsharpInterp/Interpreter/bin/Debug/netstandard2.0/Interpreter.pdb
+/home/toufik/.src/CsharpInterp/Interpreter/obj/Debug/netstandard2.0/Interpreter.csprojAssemblyReference.cache
+/home/toufik/.src/CsharpInterp/Interpreter/obj/Debug/netstandard2.0/Interpreter.AssemblyInfoInputs.cache
+/home/toufik/.src/CsharpInterp/Interpreter/obj/Debug/netstandard2.0/Interpreter.AssemblyInfo.cs
+/home/toufik/.src/CsharpInterp/Interpreter/obj/Debug/netstandard2.0/Interpreter.dll
+/home/toufik/.src/CsharpInterp/Interpreter/obj/Debug/netstandard2.0/Interpreter.pdb
