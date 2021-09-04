@@ -27,7 +27,7 @@ namespace Interpreter.Test.TokenizerTest
         public void Test_TokenType(string input,TokensType type)
         {
             setup(input);
-            var result=_tokenize.Tokens.Peek().type;
+            var result=_tokenize.Tokens.First.Value.type;
             Assert.Equal(type,result);
         }
 
@@ -41,7 +41,7 @@ namespace Interpreter.Test.TokenizerTest
         public void Test_Tokenvalue(string input)
         {
             setup(input);
-            var result=_tokenize.Tokens.Peek().Value;
+            var result=_tokenize.Tokens.First.Value.Value;
             Assert.Equal(input,result);
         }
 

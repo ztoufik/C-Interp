@@ -27,7 +27,7 @@ namespace Interpreter.Tokenize{
     }
 
     public class Tokenizer {
-        public readonly Queue<Token> Tokens;
+        public readonly LinkedList<Token> Tokens;
         private string input;
 
         public string Input {
@@ -36,7 +36,7 @@ namespace Interpreter.Tokenize{
         }
 
         public Tokenizer() {
-            this.Tokens=new Queue<Token>();
+            this.Tokens=new LinkedList<Token>();
         }
 
         public Tokenizer(string input):this() {
@@ -83,12 +83,12 @@ namespace Interpreter.Tokenize{
 
             while (pos<input.Length){
                 switch(input[pos]){
-                    case '+':Tokens.Enqueue(new Token(TokensType.Add,"+"));break;
-                    case '-':Tokens.Enqueue(new Token(TokensType.Sub,"-"));break;
-                    case '*':Tokens.Enqueue(new Token(TokensType.Mul,"*"));break;
-                    case '/':Tokens.Enqueue(new Token(TokensType.Div,"/"));break;
+                    case '+':Tokens.AddLast(new Token(TokensType.Add,"+"));break;
+                    case '-':Tokens.AddLast(new Token(TokensType.Sub,"-"));break;
+                    case '*':Tokens.AddLast(new Token(TokensType.Mul,"*"));break;
+                    case '/':Tokens.AddLast(new Token(TokensType.Div,"/"));break;
                     case var digit when Char.IsDigit(digit):
-                            Tokens.Enqueue(new Token(TokensType.Number,Number(input,ref pos)));break;
+                            Tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
                     case var space when Char.IsWhiteSpace(space):break;
                     default: throw new TokenExp($"invalid token {input[pos]} at {pos}");
                 }
@@ -96,7 +96,7 @@ namespace Interpreter.Tokenize{
                 pos++;
             }
 
-            Tokens.Enqueue(new Token(TokensType.Eof,null));
+            Tokens.AddLast(new Token(TokensType.Eof,null));
         }
 
         public override string ToString(){

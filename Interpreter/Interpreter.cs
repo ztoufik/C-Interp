@@ -21,8 +21,8 @@ namespace Interpreter {
 
         public Parser(){ }
 
-        public Parser(Queue<Token> tokens){
-            this._tokens=new LinkedList<Token>(tokens);
+        public Parser(LinkedList<Token> tokens){
+            this._tokens=tokens;
         }
 
         public void Parse(){

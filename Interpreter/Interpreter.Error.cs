@@ -3,11 +3,10 @@ using System;
 namespace Interpreter.Error {
 
     public class TokenExp:Exception{
-        public TokenExp(string message):base(message)
-        {}
 
-        public TokenExp():base()
-        {}
+        public TokenExp():base() {}
+
+        public TokenExp(string message):base(message) {}
     }
 
     public class ParserError:Exception{
@@ -15,4 +14,11 @@ namespace Interpreter.Error {
 
         public ParserError(string message):base(message) {}
     }
+
+    public class DivideByZeroError:Exception{
+        public DivideByZeroError():base(){}
+
+        public DivideByZeroError(string message):base(message) {}
+    }
+
 }

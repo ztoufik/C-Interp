@@ -1,3 +1,4 @@
+using Interpreter.Error;
 
 namespace Interpreter.AST {
 
@@ -68,7 +69,11 @@ namespace Interpreter.AST {
         public DivExpr(Expr left,Expr right):base(left,right) {}
 
         public override object evaluate() {
-            return (double)(left.evaluate())/(double)(right.evaluate());
+            double rightOperand=(double)(right.evaluate());
+            if(rightOperand==0){
+                throw new DivideByZeroError();
+            }
+            return (double)(left.evaluate())/rightOperand;
         }
     }
 }

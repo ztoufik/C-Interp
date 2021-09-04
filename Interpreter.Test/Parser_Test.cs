@@ -1,5 +1,6 @@
 using Xunit;
 using Interpreter.Tokenize;
+using Interpreter.Error;
 
 namespace Interpreter.Test.ParserTest
 {
@@ -44,5 +45,13 @@ namespace Interpreter.Test.ParserTest
             Assert.Equal(expected,result);
         }
 
+        [Theory]
+        [InlineData("3/0")]
+        [InlineData("0/0")]
+        public void Test_DivideByZero(string input)
+        {
+            setup(input);
+            Assert.Throws<DivideByZeroError>(()=>_parser.AST.evaluate());
+        }
     }
 }
