@@ -1,7 +1,7 @@
 *.sh
 InterpreterCon/*
-Interpreter/bin/*
-Interpreter/obj/*
+Interpreter/bin/
+Interpreter/obj/
 Interpreter/notes.txt
-Interpreter.Test/bin/*
-Interpreter.Test/obj/*
+Interpreter.Test/bin/
+Interpreter.Test/obj/

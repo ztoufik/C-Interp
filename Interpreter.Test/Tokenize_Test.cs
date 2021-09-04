@@ -1,5 +1,6 @@
 using Xunit;
 using Interpreter.Tokenize;
+using Interpreter.Error;
 
 namespace Interpreter.Test.TokenizerTest
 {

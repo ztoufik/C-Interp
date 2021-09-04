@@ -6,17 +6,16 @@ namespace Interpreter.Test.ParserTest
     public class Parser_Test {
 
         private readonly Tokenizer _tokenize;
-        private readonly Parser _parser;
+        private Parser _parser;
 
         public Parser_Test(){
             _tokenize=new Tokenizer();
-            _parser=new Parser();
         }
 
         private void setup(string input){
             _tokenize.Input=input;
             _tokenize.Tokenize();
-            _parser.Tokens=_tokenize.Tokens;
+            _parser=new Parser(_tokenize.Tokens);
             _parser.Parse();
         }
 

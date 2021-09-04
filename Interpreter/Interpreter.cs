@@ -1,92 +1,16 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using Interpreter.Tokenize;
+using Interpreter.AST;
+using Interpreter.Error;
 
 namespace Interpreter {
-    abstract public class Expr {
-         abstract public object evaluate();
-    }
-
-    public abstract class Var:Expr {
-        protected readonly string type;
-        protected readonly object Value;
-
-        public Var(string type,object Value)
-        {
-            this.type=type;
-            this.Value=Value;
-        }
-    }
-
-    public class Number:Var {
-        public Number(string Value):base("Number",double.Parse(Value)) {
-        }
-
-        public override object evaluate() {
-            return Value;
-        }
-    }
-
-    abstract public class BinExpr:Expr {
-        protected readonly Expr left;
-        protected readonly Expr right;
-
-        public BinExpr(Expr left,Expr right) {
-            this.left=left;
-            this.right=right;
-        }
-    }
-
-    abstract public class ArthmExpr:BinExpr {
-        public ArthmExpr(Expr left,Expr right):base(left,right) {
-        }
-    }
-
-    public class AddExpr:ArthmExpr {
-        public AddExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())+(double)(right.evaluate());
-        }
-    }
-
-    public class SubExpr:ArthmExpr {
-        public SubExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())-(double)(right.evaluate());
-        }
-    }
-
-    public class MulExpr:ArthmExpr {
-        public MulExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())*(double)(right.evaluate());
-        }
-    }
-
-    public class DivExpr:ArthmExpr {
-        public DivExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())/(double)(right.evaluate());
-        }
-    }
-
-    public class ParserError:Exception{
-        public ParserError():base() {}
-
-        public ParserError(string message):base(message) {}
-    }
 
     public class Parser{
         
-        private Queue<Token> _tokens;
+        private LinkedList<Token> _tokens;
         private Expr _ast;
 
-        public Queue<Token> Tokens{
+        public LinkedList<Token> Tokens{
             get {return _tokens;}
             set {_tokens=value;}
         }
@@ -98,80 +22,72 @@ namespace Interpreter {
         public Parser(){ }
 
         public Parser(Queue<Token> tokens){
-            this._tokens=tokens;
+            this._tokens=new LinkedList<Token>(tokens);
         }
 
         public void Parse(){
             _ast=Exprs(_tokens);
         }
 
-        private void log(IEnumerable<Token> tokens){
-            foreach(var token in tokens){
-                Console.WriteLine(token);
-            }
-            Console.WriteLine("*******");
-        }
-
-        private Expr Exprs(IEnumerable<Token> tokens){
-            int index=(int)tokens.LongCount();
-            if (index==0){
+        private Expr Exprs(LinkedList<Token> tokens){
+            if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
 
             var FactorTokens=new LinkedList<Token>();
-            foreach(var token in tokens.Take(index-1).Reverse<Token>()){
-                index--;
+            while(tokens.Count>0){
+                Token token=tokens.Last.Value;
+                tokens.RemoveLast();
                 switch(token.type){
                     case TokensType.Add:
                         return new AddExpr(
-                                Exprs(tokens.Take(index)),
-                                Factor(FactorTokens.Reverse()));
+                                Exprs(tokens),
+                                Factor(FactorTokens));
                     case TokensType.Sub:
                         return new SubExpr(
-                                Exprs(tokens.Take(index)),
-                                Factor(FactorTokens.Reverse()));
-                    case TokensType.Eof:
-                        return Factor(FactorTokens.Reverse());
-                    default: FactorTokens.AddLast(token);break;
+                                Exprs(tokens),
+                                Factor(FactorTokens));
+                    case TokensType.Eof:continue;
+                    default: FactorTokens.AddFirst(token);break;
                 }
             }
-                    return Factor(FactorTokens.Reverse());
+            return Factor(FactorTokens);
         }
 
-        private Expr Factor(IEnumerable<Token> tokens){
-            int index=(int)tokens.LongCount();
-            if (index==0){
+        private Expr Factor(LinkedList<Token> tokens){
+            if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
 
             var TermTokens=new LinkedList<Token>();
-            foreach(var token in tokens.Reverse<Token>()){
+            while(tokens.Count>0){
+                Token token=tokens.Last.Value;
+                tokens.RemoveLast();
                 switch(token.type){
                     case TokensType.Mul:
                         return new MulExpr(
-                                Exprs(tokens.Take(index)),
-                                Term(TermTokens.Reverse()));
+                                Exprs(tokens),
+                                Term(TermTokens));
                     case TokensType.Div:
                         return new DivExpr(
-                                Exprs(tokens.Take(index)),
-                                Term(TermTokens.Reverse()));
-                    case TokensType.Eof:return Term(TermTokens);
-                    default:TermTokens.AddLast(token);break;
+                                Exprs(tokens),
+                                Term(TermTokens));
+                    case TokensType.Eof:continue;
+                    default:TermTokens.AddFirst(token);break;
                 }
-                index--;
             }
-            return Term(TermTokens.Reverse());
+            return Term(TermTokens);
         }
 
-        private Expr Term(IEnumerable<Token> tokens){
-            if (tokens.LongCount()==0){
+        private Expr Term(LinkedList<Token> tokens){
+            if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
 
-            if (tokens.LongCount()>1){
+            if (tokens.Count>1){
                 throw new ParserError("More than one Number token");
             }
-            return new Number(tokens.ToArray<Token>()[0].Value);
+            return new Number(tokens.First.Value.Value);
         }
 
     }

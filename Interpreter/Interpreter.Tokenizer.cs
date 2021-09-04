@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using Interpreter.Error;
 
 namespace Interpreter.Tokenize{
 
@@ -9,13 +10,6 @@ namespace Interpreter.Tokenize{
         Number,Add,Sub,Mul,Div,Eof
     }
 
-    public class TokenExp:Exception{
-        public TokenExp(string message):base(message)
-        {}
-
-        public TokenExp():base()
-        {}
-    }
 
     public struct Token {
         public readonly TokensType type;
