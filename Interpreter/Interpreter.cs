@@ -109,44 +109,58 @@ namespace Interpreter {
             foreach(var token in tokens){
                 Console.WriteLine(token);
             }
+            Console.WriteLine("*******");
         }
 
         private Expr Exprs(IEnumerable<Token> tokens){
-            if (tokens.LongCount()==0){
+            int index=(int)tokens.LongCount();
+            if (index==0){
                 throw new ParserError("empty tokens stream");
             }
 
             var FactorTokens=new LinkedList<Token>();
-            int index=0;
-            foreach(var token in tokens){
+            foreach(var token in tokens.Take(index-1).Reverse<Token>()){
+                index--;
                 switch(token.type){
-                    case TokensType.Add:log(FactorTokens);return new AddExpr(Factor(FactorTokens),Exprs(tokens.Skip(index+1)));
-                    case TokensType.Sub:return new SubExpr(Factor(FactorTokens),Exprs(tokens.Skip(index+1)));
-                    case TokensType.Eof:return Factor(FactorTokens);
+                    case TokensType.Add:
+                        return new AddExpr(
+                                Exprs(tokens.Take(index)),
+                                Factor(FactorTokens.Reverse()));
+                    case TokensType.Sub:
+                        return new SubExpr(
+                                Exprs(tokens.Take(index)),
+                                Factor(FactorTokens.Reverse()));
+                    case TokensType.Eof:
+                        return Factor(FactorTokens.Reverse());
                     default: FactorTokens.AddLast(token);break;
                 }
-                index++;
             }
-                    return Factor(FactorTokens);
+                    return Factor(FactorTokens.Reverse());
         }
 
         private Expr Factor(IEnumerable<Token> tokens){
-            if (tokens.LongCount()==0){
+            int index=(int)tokens.LongCount();
+            if (index==0){
                 throw new ParserError("empty tokens stream");
             }
 
             var TermTokens=new LinkedList<Token>();
-            int index=0;
-            foreach(var token in tokens){
+            foreach(var token in tokens.Reverse<Token>()){
                 switch(token.type){
-                    case TokensType.Mul:return new MulExpr(Term(TermTokens),Exprs(tokens.Skip(index+1)));
-                    case TokensType.Div:return new DivExpr(Term(TermTokens),Exprs(tokens.Skip(index+1)));
+                    case TokensType.Mul:
+                        return new MulExpr(
+                                Exprs(tokens.Take(index)),
+                                Term(TermTokens.Reverse()));
+                    case TokensType.Div:
+                        return new DivExpr(
+                                Exprs(tokens.Take(index)),
+                                Term(TermTokens.Reverse()));
                     case TokensType.Eof:return Term(TermTokens);
                     default:TermTokens.AddLast(token);break;
                 }
-                index++;
+                index--;
             }
-            return Term(TermTokens);
+            return Term(TermTokens.Reverse());
         }
 
         private Expr Term(IEnumerable<Token> tokens){
