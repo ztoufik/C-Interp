@@ -1,7 +1,6 @@
 using Interpreter.Error;
 
 namespace Interpreter.AST {
-
     abstract public class Expr {
          abstract public object evaluate();
     }

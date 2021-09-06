@@ -1,3 +1,4 @@
+//using System;
 using System.Collections.Generic;
 using Interpreter.Tokenize;
 using Interpreter.AST;
@@ -26,110 +27,70 @@ namespace Interpreter {
         }
 
         public void Parse(){
-            _ast=Exprs(_tokens);
+            _ast=ParseAdd(_tokens);
         }
 
-        private Expr Exprs(LinkedList<Token> tokens){
-            if (tokens.Count==0){
-                throw new ParserError("empty tokens stream");
-            }
+        private Expr ParseAdd(LinkedList<Token> tokens){
 
-            var FactorTokens=new LinkedList<Token>();
-            while(tokens.Count>0){
-                Token token=tokens.Last.Value;
-                tokens.RemoveLast();
-                switch(token.type){
-                    case TokensType.Add:
-                        return new AddExpr(
-                                Exprs(tokens),
-                                Factor(FactorTokens));
-                    case TokensType.Sub:
-                        return new SubExpr(
-                                Exprs(tokens),
-                                Factor(FactorTokens));
-                    case TokensType.RP: do{
-                                            FactorTokens.AddFirst(token);
-                                            if(tokens.Count<=0)
-                                                throw new ParserError("missing (");
-                                            token=tokens.Last.Value;
-                                            tokens.RemoveLast();
-                                }while(token.type!=TokensType.LP);
-                                            FactorTokens.AddFirst(token);
-                                            break;
-                    case TokensType.Eof:continue;
-                    default: FactorTokens.AddFirst(token);break;
-                }
-            }
-            return Factor(FactorTokens);
-        }
+            Expr AddtvNode=ParseMul(tokens);
 
-        private Expr Factor(LinkedList<Token> tokens){
-            if (tokens.Count==0){
-                throw new ParserError("empty tokens stream");
-            }
+            var token=tokens.First.Value;
 
-            var TermsTokens=new LinkedList<Token>();
-            while(tokens.Count>0){
-                Token token=tokens.Last.Value;
-                tokens.RemoveLast();
-                switch(token.type){
-                    case TokensType.Mul:
-                        return new MulExpr(
-                                Exprs(tokens),
-                                Terms(TermsTokens));
-                    case TokensType.Div:
-                        return new DivExpr(
-                                Exprs(tokens),
-                                Terms(TermsTokens));
-                    case TokensType.RP: do{
-                                            TermsTokens.AddFirst(token);
-                                            if(tokens.Count<=0)
-                                                throw new ParserError("missing (");
-                                            token=tokens.Last.Value;
-                                            tokens.RemoveLast();
-                                }while(token.type!=TokensType.LP);
-                                            TermsTokens.AddFirst(token);
-                                            break;
-                    default:TermsTokens.AddFirst(token);break;
-                }
-            }
-            return Terms(TermsTokens);
-        }
-
-        private Expr Terms(LinkedList<Token> tokens){
-            if (tokens.Count==0){
-                throw new ParserError("empty tokens stream");
-            }
-
-            var last=tokens.Last.Value;
-            var first=tokens.First.Value;
-            if(last.type==TokensType.RP){
-                if(first.type!=TokensType.LP){
-                    throw new ParserError("missing (");
-                }
-                tokens.RemoveLast();
+            while((token.type==TokensType.Add) || (token.type==TokensType.Sub)){
                 tokens.RemoveFirst();
-                return Exprs(tokens);
-            }
-            else {
-                if(first.type==TokensType.LP){
-                    throw new ParserError("missing )");
+                if(token.type==TokensType.Add){
+                        AddtvNode= new AddExpr(AddtvNode,ParseMul(tokens));
                 }
-                return Term(tokens);
+                else {
+                        AddtvNode= new SubExpr(AddtvNode,ParseMul(tokens));
+                }
+             token=tokens.First.Value;
             }
+            return AddtvNode;
         }
 
+        private Expr ParseMul(LinkedList<Token> tokens){
 
-        private Expr Term(LinkedList<Token> tokens){
+            Expr MultplNode=ParseTerm(tokens);
+
+
+            var token=tokens.First.Value;
+
+            while((token.type==TokensType.Mul) || (token.type==TokensType.Div)){
+                tokens.RemoveFirst();
+                if(token.type==TokensType.Mul){
+                        MultplNode= new MulExpr(MultplNode,ParseTerm(tokens));
+                }
+                else {
+                        MultplNode= new DivExpr(MultplNode,ParseTerm(tokens));
+                }
+                token=tokens.First.Value;
+            }
+            return MultplNode;
+        }
+
+        private Expr ParseTerm(LinkedList<Token> tokens){
             if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
 
-            if (tokens.Count>1){
-                throw new ParserError("More than one Number token");
+            var node=tokens.First.Value;
+            tokens.RemoveFirst();
+            switch(node.type){
+                case TokensType.Number:return new Number(node.Value);
+                default:throw new ParserError("expected Number token");
             }
-            return new Number(tokens.First.Value.Value);
         }
-
     }
+
 }
+
+            //Console.WriteLine("before proc");
+            //foreach(var tk in tokens){
+            //    Console.WriteLine(tk);
+            //}
+            
+            //Console.WriteLine("after proc");
+            //foreach(var tk in tokens){
+            //    Console.WriteLine(tk);
+            //}
