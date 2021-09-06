@@ -1,4 +1,3 @@
-//using System;
 using System.Collections.Generic;
 using Interpreter.Tokenize;
 using Interpreter.AST;
@@ -51,7 +50,7 @@ namespace Interpreter {
 
         private Expr ParseMul(LinkedList<Token> tokens){
 
-            Expr MultplNode=ParseTerm(tokens);
+            Expr MultplNode=ParseParenth(tokens);
 
 
             var token=tokens.First.Value;
@@ -59,14 +58,45 @@ namespace Interpreter {
             while((token.type==TokensType.Mul) || (token.type==TokensType.Div)){
                 tokens.RemoveFirst();
                 if(token.type==TokensType.Mul){
-                        MultplNode= new MulExpr(MultplNode,ParseTerm(tokens));
+                        MultplNode= new MulExpr(MultplNode,ParseParenth(tokens));
                 }
                 else {
-                        MultplNode= new DivExpr(MultplNode,ParseTerm(tokens));
+                        MultplNode= new DivExpr(MultplNode,ParseParenth(tokens));
                 }
                 token=tokens.First.Value;
             }
             return MultplNode;
+        }
+
+        private Expr ParseParenth(LinkedList<Token> tokens){
+
+            var node=tokens.First.Value;
+
+            if(node.type==TokensType.LP){
+                int LPN=1;
+                tokens.RemoveFirst();
+                var tokensstream=new LinkedList<Token>();
+
+                node=tokens.First.Value;
+                while(LPN>0){
+                    if(node.type==TokensType.LP){
+                        LPN++;
+                    }
+
+                    if(node.type==TokensType.RP){
+                        LPN--;
+                    }
+                    tokensstream.AddLast(node);
+                    tokens.RemoveFirst();
+                    if(tokens.Count<=0){
+                        throw new ParserError("missing )");
+                    }
+                    node=tokens.First.Value;
+                }
+                tokensstream.AddLast(new Token(TokensType.Eof,null));
+                return ParseAdd(tokensstream);
+            }
+            return ParseTerm(tokens);
         }
 
         private Expr ParseTerm(LinkedList<Token> tokens){
@@ -80,17 +110,7 @@ namespace Interpreter {
                 case TokensType.Number:return new Number(node.Value);
                 default:throw new ParserError("expected Number token");
             }
-        }
+    }
     }
 
 }
-
-            //Console.WriteLine("before proc");
-            //foreach(var tk in tokens){
-            //    Console.WriteLine(tk);
-            //}
-            
-            //Console.WriteLine("after proc");
-            //foreach(var tk in tokens){
-            //    Console.WriteLine(tk);
-            //}
