@@ -2,11 +2,11 @@ using System;
 
 namespace Interpreter.Error {
 
-    public class TokenExp:Exception{
+    public class TokenError:Exception{
 
-        public TokenExp():base() {}
+        public TokenError():base() {}
 
-        public TokenExp(string message):base(message) {}
+        public TokenError(string message):base(message) {}
     }
 
     public class ParserError:Exception{

@@ -47,6 +47,15 @@ namespace Interpreter {
                         return new SubExpr(
                                 Exprs(tokens),
                                 Factor(FactorTokens));
+                    case TokensType.RP: do{
+                                            FactorTokens.AddFirst(token);
+                                            if(tokens.Count<=0)
+                                                throw new ParserError("missing (");
+                                            token=tokens.Last.Value;
+                                            tokens.RemoveLast();
+                                }while(token.type!=TokensType.LP);
+                                            FactorTokens.AddFirst(token);
+                                            break;
                     case TokensType.Eof:continue;
                     default: FactorTokens.AddFirst(token);break;
                 }
@@ -59,7 +68,7 @@ namespace Interpreter {
                 throw new ParserError("empty tokens stream");
             }
 
-            var TermTokens=new LinkedList<Token>();
+            var TermsTokens=new LinkedList<Token>();
             while(tokens.Count>0){
                 Token token=tokens.Last.Value;
                 tokens.RemoveLast();
@@ -67,17 +76,49 @@ namespace Interpreter {
                     case TokensType.Mul:
                         return new MulExpr(
                                 Exprs(tokens),
-                                Term(TermTokens));
+                                Terms(TermsTokens));
                     case TokensType.Div:
                         return new DivExpr(
                                 Exprs(tokens),
-                                Term(TermTokens));
-                    case TokensType.Eof:continue;
-                    default:TermTokens.AddFirst(token);break;
+                                Terms(TermsTokens));
+                    case TokensType.RP: do{
+                                            TermsTokens.AddFirst(token);
+                                            if(tokens.Count<=0)
+                                                throw new ParserError("missing (");
+                                            token=tokens.Last.Value;
+                                            tokens.RemoveLast();
+                                }while(token.type!=TokensType.LP);
+                                            TermsTokens.AddFirst(token);
+                                            break;
+                    default:TermsTokens.AddFirst(token);break;
                 }
             }
-            return Term(TermTokens);
+            return Terms(TermsTokens);
         }
+
+        private Expr Terms(LinkedList<Token> tokens){
+            if (tokens.Count==0){
+                throw new ParserError("empty tokens stream");
+            }
+
+            var last=tokens.Last.Value;
+            var first=tokens.First.Value;
+            if(last.type==TokensType.RP){
+                if(first.type!=TokensType.LP){
+                    throw new ParserError("missing (");
+                }
+                tokens.RemoveLast();
+                tokens.RemoveFirst();
+                return Exprs(tokens);
+            }
+            else {
+                if(first.type==TokensType.LP){
+                    throw new ParserError("missing )");
+                }
+                return Term(tokens);
+            }
+        }
+
 
         private Expr Term(LinkedList<Token> tokens){
             if (tokens.Count==0){

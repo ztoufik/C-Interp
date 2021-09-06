@@ -24,6 +24,8 @@ namespace Interpreter.Test.TokenizerTest
         [InlineData("-",TokensType.Sub)]
         [InlineData("*",TokensType.Mul)]
         [InlineData("/",TokensType.Div)]
+        [InlineData("(",TokensType.LP)]
+        [InlineData(")",TokensType.RP)]
         public void Test_TokenType(string input,TokensType type)
         {
             setup(input);
@@ -51,7 +53,7 @@ namespace Interpreter.Test.TokenizerTest
         public void Test_TokenException(string input)
         {
             _tokenize.Input=input;
-            Assert.Throws<TokenExp>(()=>_tokenize.Tokenize());
+            Assert.Throws<TokenError>(()=>_tokenize.Tokenize());
         }
 
         [Theory]

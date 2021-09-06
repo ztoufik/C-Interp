@@ -7,7 +7,7 @@ using Interpreter.Error;
 namespace Interpreter.Tokenize{
 
     public enum TokensType{
-        Number,Add,Sub,Mul,Div,Eof
+        Number,Add,Sub,Mul,Div,LP,RP,Eof
     }
 
 
@@ -60,14 +60,14 @@ namespace Interpreter.Tokenize{
                                     decipnt=true;
                                 }
                                 else
-                                    throw new TokenExp($"invalid decimal point at {pos}");
+                                    throw new TokenError($"invalid decimal point at {pos}");
                             }
                             catch (IndexOutOfRangeException ){
-                                throw new TokenExp($"invalid decimal point at {pos}");
+                                throw new TokenError($"invalid decimal point at {pos}");
                             }
                         }
                         else
-                            throw new TokenExp($"invalid decimal point at {pos}");
+                            throw new TokenError($"invalid decimal point at {pos}");
                     }
                     else
                         break;
@@ -87,10 +87,12 @@ namespace Interpreter.Tokenize{
                     case '-':Tokens.AddLast(new Token(TokensType.Sub,"-"));break;
                     case '*':Tokens.AddLast(new Token(TokensType.Mul,"*"));break;
                     case '/':Tokens.AddLast(new Token(TokensType.Div,"/"));break;
+                    case '(':Tokens.AddLast(new Token(TokensType.LP,"("));break;
+                    case ')':Tokens.AddLast(new Token(TokensType.RP,")"));break;
                     case var digit when Char.IsDigit(digit):
                             Tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
                     case var space when Char.IsWhiteSpace(space):break;
-                    default: throw new TokenExp($"invalid token {input[pos]} at {pos}");
+                    default: throw new TokenError($"invalid token {input[pos]} at {pos}");
                 }
 
                 pos++;
