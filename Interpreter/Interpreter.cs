@@ -50,21 +50,35 @@ namespace Interpreter {
 
         private Expr ParseMul(LinkedList<Token> tokens){
 
-            Expr MultplNode=ParseParenth(tokens);
+            Expr MultplNode=ParseUnOpr(tokens);
 
             var token=tokens.First.Value;
 
             while((token.type==TokensType.Mul) || (token.type==TokensType.Div)){
                 tokens.RemoveFirst();
                 if(token.type==TokensType.Mul){
-                        MultplNode= new MulExpr(MultplNode,ParseParenth(tokens));
+                        MultplNode= new MulExpr(MultplNode,ParseUnOpr(tokens));
                 }
                 else {
-                        MultplNode= new DivExpr(MultplNode,ParseParenth(tokens));
+                        MultplNode= new DivExpr(MultplNode,ParseUnOpr(tokens));
                 }
                 token=tokens.First.Value;
             }
             return MultplNode;
+        }
+
+        private Expr ParseUnOpr(LinkedList<Token> tokens){
+
+            var node=tokens.First.Value;
+            switch(node.type){
+                case TokensType.Add:
+                    tokens.RemoveFirst();
+                    return new PlusExpr(ParseParenth(tokens));
+                case TokensType.Sub:
+                    tokens.RemoveFirst();
+                    return new MinusExpr(ParseParenth(tokens));
+                default:return ParseParenth(tokens);
+            }
         }
 
         private Expr ParseParenth(LinkedList<Token> tokens){
@@ -96,22 +110,9 @@ namespace Interpreter {
                 return ParseAdd(tokensstream);
             }
 
-            return ParseUnOpr(tokens);
+            return ParseTerm(tokens);
         }
 
-        private Expr ParseUnOpr(LinkedList<Token> tokens){
-
-            var node=tokens.First.Value;
-            switch(node.type){
-                case TokensType.Add:
-                    tokens.RemoveFirst();
-                    return new PlusExpr(ParseTerm(tokens));
-                case TokensType.Sub:
-                    tokens.RemoveFirst();
-                    return new MinusExpr(ParseTerm(tokens));
-                default:return ParseTerm(tokens);
-            }
-        }
 
         private Expr ParseTerm(LinkedList<Token> tokens){
 

@@ -50,6 +50,7 @@ namespace Interpreter.Test.ParserTest
         [InlineData("1+(3-2)",1+(3-2))]
         [InlineData("1-(3-2)",1-(3-2))]
         [InlineData("-1",-1)]
+        [InlineData("-(1)",-(1))]
         [InlineData("-1+1",0)]
         [InlineData("-1-1",-2)]
         [InlineData("-2*3",-2*3)]
