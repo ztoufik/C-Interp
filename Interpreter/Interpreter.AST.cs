@@ -75,4 +75,28 @@ namespace Interpreter.AST {
             return (double)(left.evaluate())/rightOperand;
         }
     }
+
+    abstract public class UnExpr:Expr {
+        protected readonly Expr _Op;
+
+        public UnExpr(Expr Op) {
+            this._Op=Op;
+        }
+    }
+
+    public class PlusExpr:UnExpr {
+        public PlusExpr(Expr Op):base(Op) {}
+
+        public override object evaluate() {
+           return (double)(_Op.evaluate()); 
+        }
+    }
+
+    public class MinusExpr:UnExpr {
+        public MinusExpr(Expr Op):base(Op) {}
+
+        public override object evaluate() {
+           return (-1)*(double)(_Op.evaluate()); 
+        }
+    }
 }

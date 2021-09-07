@@ -52,7 +52,6 @@ namespace Interpreter {
 
             Expr MultplNode=ParseParenth(tokens);
 
-
             var token=tokens.First.Value;
 
             while((token.type==TokensType.Mul) || (token.type==TokensType.Div)){
@@ -96,10 +95,26 @@ namespace Interpreter {
                 tokensstream.AddLast(new Token(TokensType.Eof,null));
                 return ParseAdd(tokensstream);
             }
-            return ParseTerm(tokens);
+
+            return ParseUnOpr(tokens);
+        }
+
+        private Expr ParseUnOpr(LinkedList<Token> tokens){
+
+            var node=tokens.First.Value;
+            switch(node.type){
+                case TokensType.Add:
+                    tokens.RemoveFirst();
+                    return new PlusExpr(ParseTerm(tokens));
+                case TokensType.Sub:
+                    tokens.RemoveFirst();
+                    return new MinusExpr(ParseTerm(tokens));
+                default:return ParseTerm(tokens);
+            }
         }
 
         private Expr ParseTerm(LinkedList<Token> tokens){
+
             if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
@@ -110,7 +125,8 @@ namespace Interpreter {
                 case TokensType.Number:return new Number(node.Value);
                 default:throw new ParserError("expected Number token");
             }
-    }
+        }
+
     }
 
 }
