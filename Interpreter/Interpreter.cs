@@ -1,133 +1,106 @@
 using System.Collections.Generic;
-using Interpreter.Tokenize;
-using Interpreter.AST;
-using Interpreter.Error;
+using PL.Tokenize;
+using PL.AST;
+using PL.Parse;
+using PL.Error;
 
-namespace Interpreter {
+namespace PL {
 
-    public class Parser{
-        
+    public class Interpreter{
+        readonly private Tokenizer _tokenzier;
+        readonly private Parser _parser;
         private LinkedList<Token> _tokens;
-        private Expr _ast;
+        private Statement_List _ast;
+        private string _input;
+        private IDictionary<string,ObjNode> _scope;
+
+        public string Input{
+            get {return _input;}
+            set {_input =value;}
+        }
 
         public LinkedList<Token> Tokens{
             get {return _tokens;}
-            set {_tokens=value;}
+            //set {_tokens =value;}
         }
 
-        public Expr AST{
+        public Statement_List Ast{
             get {return _ast;}
+            //set {_ast =value;}
         }
 
-        public Parser(){ }
+        public IDictionary<string,ObjNode> Scope{
+            get {return _scope;}
+        }
+        public Interpreter(){
+            this._tokenzier=new Tokenizer();
+            this._parser=new Parser();
+            this._scope=new Dictionary<string,ObjNode>();
+        }
 
-        public Parser(LinkedList<Token> tokens){
-            this._tokens=tokens;
+        public void Tokenize(){
+            this._tokens=this._tokenzier.Tokenize(_input);
         }
 
         public void Parse(){
-            _ast=ParseAdd(_tokens);
+            this._ast=this._parser.Parse(this._tokens);
         }
 
-        private Expr ParseAdd(LinkedList<Token> tokens){
+        public void Execute(){
+            Tokenize();
+            Parse();
+            Visit_Statments_List(this._ast);
+        }
 
-            Expr AddtvNode=ParseMul(tokens);
-
-            var token=tokens.First.Value;
-
-            while((token.type==TokensType.Add) || (token.type==TokensType.Sub)){
-                tokens.RemoveFirst();
-                if(token.type==TokensType.Add){
-                        AddtvNode= new AddExpr(AddtvNode,ParseMul(tokens));
-                }
-                else {
-                        AddtvNode= new SubExpr(AddtvNode,ParseMul(tokens));
-                }
-             token=tokens.First.Value;
+        private void Visit_Statments_List(Statement_List stmts_list){
+            foreach(var stmt in stmts_list.statements){
+                Visit_Statment(stmt);
             }
-            return AddtvNode;
+
         }
-
-        private Expr ParseMul(LinkedList<Token> tokens){
-
-            Expr MultplNode=ParseUnOpr(tokens);
-
-            var token=tokens.First.Value;
-
-            while((token.type==TokensType.Mul) || (token.type==TokensType.Div)){
-                tokens.RemoveFirst();
-                if(token.type==TokensType.Mul){
-                        MultplNode= new MulExpr(MultplNode,ParseUnOpr(tokens));
-                }
-                else {
-                        MultplNode= new DivExpr(MultplNode,ParseUnOpr(tokens));
-                }
-                token=tokens.First.Value;
-            }
-            return MultplNode;
-        }
-
-        private Expr ParseUnOpr(LinkedList<Token> tokens){
-
-            var node=tokens.First.Value;
-            switch(node.type){
-                case TokensType.Add:
-                    tokens.RemoveFirst();
-                    return new PlusExpr(ParseParenth(tokens));
-                case TokensType.Sub:
-                    tokens.RemoveFirst();
-                    return new MinusExpr(ParseParenth(tokens));
-                default:return ParseParenth(tokens);
+        private void Visit_Statment(Statement stmt){
+            switch(stmt){
+                case Expr expr:Visit_Expr(expr);break;
+                case Assign assign:VisitAssign(assign);break;
             }
         }
 
-        private Expr ParseParenth(LinkedList<Token> tokens){
+        private void VisitAssign(Assign assign){
+            this._scope[assign.Id.VarName]=Visit_Expr(assign.expr);
+        }
 
-            var node=tokens.First.Value;
-
-            if(node.type==TokensType.LP){
-                int LPN=1;
-                tokens.RemoveFirst();
-                var tokensstream=new LinkedList<Token>();
-
-                node=tokens.First.Value;
-                while(LPN>0){
-                    if(node.type==TokensType.LP){
-                        LPN++;
+        private ObjNode Visit_Expr(Expr expr){
+            switch(expr){
+                case Id id:
+                    if(!this._scope.Keys.Contains(id.VarName)){
+                        throw new ExecuteError("indefined identifier");
                     }
+                        return this._scope[id.VarName];
 
-                    if(node.type==TokensType.RP){
-                        LPN--;
-                    }
-                    tokensstream.AddLast(node);
-                    tokens.RemoveFirst();
-                    if(tokens.Count<=0){
-                        throw new ParserError("missing )");
-                    }
-                    node=tokens.First.Value;
-                }
-                tokensstream.AddLast(new Token(TokensType.Eof,null));
-                return ParseAdd(tokensstream);
-            }
+                case ObjNode objnode:
+                    return objnode;
 
-            return ParseTerm(tokens);
-        }
+                case AddExpr addexpr:
+                    return (Number)(Visit_Expr(addexpr.Left))+(Number)(Visit_Expr(addexpr.Right));
+
+                case SubExpr subexpr:
+                    return (Number)(Visit_Expr(subexpr.Left))-(Number)(Visit_Expr(subexpr.Right));
+
+                case MulExpr mulexpr:
+                    return (Number)(Visit_Expr(mulexpr.Left))*(Number)(Visit_Expr(mulexpr.Right));
+
+                case DivExpr divexpr:
+                    return (Number)(Visit_Expr(divexpr.Left))/(Number)(Visit_Expr(divexpr.Right));
+
+                case PlusExpr plusexpr:
+                    return Visit_Expr(plusexpr.Op);
+
+                case MinusExpr minusexpr:
+                    return new Number("-1")*(Number)Visit_Expr(minusexpr.Op);
 
 
-        private Expr ParseTerm(LinkedList<Token> tokens){
-
-            if (tokens.Count==0){
-                throw new ParserError("empty tokens stream");
-            }
-
-            var node=tokens.First.Value;
-            tokens.RemoveFirst();
-            switch(node.type){
-                case TokensType.Number:return new Number(node.Value);
-                default:throw new ParserError("expected Number token");
+                default: throw new ExecuteError("indefined AST Node");
             }
         }
-
     }
-
 }

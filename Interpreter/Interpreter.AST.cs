@@ -1,37 +1,78 @@
-using Interpreter.Error;
+using PL.Error;
 
-namespace Interpreter.AST {
-    abstract public class Expr {
-         abstract public object evaluate();
+namespace PL.AST {
+
+    abstract public class Statement {
+        public Statement(){ }
     }
 
-    public abstract class Var:Expr {
-        protected readonly string type;
+    abstract public class Expr:Statement {
+    }
+
+    public abstract class ObjNode:Expr {
         protected readonly object Value;
 
-        public Var(string type,object Value)
-        {
-            this.type=type;
+        public ObjNode(object Value) {
             this.Value=Value;
+        }
+
+        public override string ToString(){
+            return this.Value.ToString();
         }
     }
 
-    public class Number:Var {
-        public Number(string Value):base("Number",double.Parse(Value)) {
+    public class Number:ObjNode {
+        public Number(string Value):base(double.Parse(Value)) {
         }
 
-        public override object evaluate() {
-            return Value;
+        static public Number operator +(Number own,Number other){
+            var sum=(double)own.Value+(double)(other.Value);
+            return new Number(sum.ToString());
         }
+
+        static public Number operator -(Number own,Number other){
+            var sum=(double)own.Value+ (-(double)(other.Value));
+            return new Number(sum.ToString());
+        }
+
+        static public Number operator *(Number own,Number other){
+            var sum=(double)own.Value*(double)(other.Value);
+            return new Number(sum.ToString());
+        }
+
+        static public Number operator /(Number own,Number other){
+            if((double)other.Value==0){
+                throw new DivideByZeroError();
+            }
+
+            var sum=(double)own.Value/(double)(other.Value);
+            return new Number(sum.ToString());
+        }
+    }
+
+    public class Id:ObjNode {
+        private string _varname;
+
+        public string VarName{
+            get { return _varname;}
+        }
+
+        public Id(string varname):base(varname) {
+            this._varname=varname;
+        }
+
     }
 
     abstract public class BinExpr:Expr {
-        protected readonly Expr left;
-        protected readonly Expr right;
+        protected readonly Expr _left;
+        protected readonly Expr _right;
+
+        public Expr Left{ get {return _left;}}
+        public Expr Right{ get {return _right;}}
 
         public BinExpr(Expr left,Expr right) {
-            this.left=left;
-            this.right=right;
+            this._left=left;
+            this._right=right;
         }
     }
 
@@ -42,42 +83,23 @@ namespace Interpreter.AST {
 
     public class AddExpr:ArthmExpr {
         public AddExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())+(double)(right.evaluate());
-        }
     }
 
     public class SubExpr:ArthmExpr {
         public SubExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())-(double)(right.evaluate());
-        }
     }
 
     public class MulExpr:ArthmExpr {
         public MulExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            return (double)(left.evaluate())*(double)(right.evaluate());
-        }
     }
 
     public class DivExpr:ArthmExpr {
         public DivExpr(Expr left,Expr right):base(left,right) {}
-
-        public override object evaluate() {
-            double rightOperand=(double)(right.evaluate());
-            if(rightOperand==0){
-                throw new DivideByZeroError();
-            }
-            return (double)(left.evaluate())/rightOperand;
-        }
     }
 
     abstract public class UnExpr:Expr {
         protected readonly Expr _Op;
+        public Expr Op{get{return _Op;}}
 
         public UnExpr(Expr Op) {
             this._Op=Op;
@@ -86,17 +108,33 @@ namespace Interpreter.AST {
 
     public class PlusExpr:UnExpr {
         public PlusExpr(Expr Op):base(Op) {}
-
-        public override object evaluate() {
-           return (double)(_Op.evaluate()); 
-        }
     }
 
     public class MinusExpr:UnExpr {
         public MinusExpr(Expr Op):base(Op) {}
+    }
 
-        public override object evaluate() {
-           return (-1)*(double)(_Op.evaluate()); 
+    public class Assign:Statement {
+        private Id _id;
+        private Expr _expr;
+
+        public Id Id {get {return _id;}}
+        public Expr expr {get {return _expr;}}
+
+        public Assign(Id id,Expr expr):base() {
+            this._id=id;
+            this._expr=expr;
+        }
+    }
+    
+    public class Statement_List{
+
+        private readonly Statement[] _statements;
+
+        public Statement[] statements {get {return this._statements;}}
+
+        public Statement_List(Statement[] statements){
+            this._statements=statements;
         }
     }
 }

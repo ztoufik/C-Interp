@@ -1,15 +1,13 @@
 using System;
-using System.Linq;
 using System.Text;
 using System.Collections.Generic;
-using Interpreter.Error;
+using PL.Error;
 
-namespace Interpreter.Tokenize{
+namespace PL.Tokenize{
 
     public enum TokensType{
-        Number,Add,Sub,Mul,Div,LP,RP,Eof
+        Number,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,Id,Eof
     }
-
 
     public struct Token {
         public readonly TokensType type;
@@ -27,20 +25,10 @@ namespace Interpreter.Tokenize{
     }
 
     public class Tokenizer {
-        public readonly LinkedList<Token> Tokens;
-        private string input;
-
-        public string Input {
-            get {return input;}
-            set {input=value;}
-        }
+        private IDictionary<string,Token> KeyWords;
 
         public Tokenizer() {
-            this.Tokens=new LinkedList<Token>();
-        }
-
-        public Tokenizer(string input):this() {
-            this.input=input;
+            KeyWords=new Dictionary<string,Token>();
         }
 
         private string Number(in string input,ref int pos){
@@ -78,19 +66,44 @@ namespace Interpreter.Tokenize{
             return number.ToString();
         }
 
-        public void Tokenize(){
+        private string ID(in string input,ref int pos){
+            StringBuilder id=new StringBuilder(10);
+            while (pos<input.Length){
+                if(Char.IsLetterOrDigit(input[pos])) {
+                    id.Append(input[pos]);
+                }
+                else{
+                    break;
+                }
+                pos++;
+            }
+            pos--;// point to the last digit character
+            return id.ToString();
+        }
+
+        public LinkedList<Token> Tokenize(string input){
+            var tokens=new LinkedList<Token>();
             int pos=0;
 
             while (pos<input.Length){
                 switch(input[pos]){
-                    case '+':Tokens.AddLast(new Token(TokensType.Add,"+"));break;
-                    case '-':Tokens.AddLast(new Token(TokensType.Sub,"-"));break;
-                    case '*':Tokens.AddLast(new Token(TokensType.Mul,"*"));break;
-                    case '/':Tokens.AddLast(new Token(TokensType.Div,"/"));break;
-                    case '(':Tokens.AddLast(new Token(TokensType.LP,"("));break;
-                    case ')':Tokens.AddLast(new Token(TokensType.RP,")"));break;
+                    case '+':tokens.AddLast(new Token(TokensType.Add,"+"));break;
+                    case '-':tokens.AddLast(new Token(TokensType.Sub,"-"));break;
+                    case '*':tokens.AddLast(new Token(TokensType.Mul,"*"));break;
+                    case '/':tokens.AddLast(new Token(TokensType.Div,"/"));break;
+                    case '(':tokens.AddLast(new Token(TokensType.LP,"("));break;
+                    case ')':tokens.AddLast(new Token(TokensType.RP,")"));break;
+                    case '{':tokens.AddLast(new Token(TokensType.Begin,"{"));break;
+                    case '}':tokens.AddLast(new Token(TokensType.End,"}"));break;
+                    case ';':tokens.AddLast(new Token(TokensType.Semi,";"));break;
+                    case '=':tokens.AddLast(new Token(TokensType.Assign,"="));break;
                     case var digit when Char.IsDigit(digit):
-                            Tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
+                            tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
+                    case var alpha when Char.IsLetter(alpha):
+                            string id=ID(input,ref pos);
+                            //if(KeyWords.ContainsKey(id)){
+                             //       }
+                            tokens.AddLast(new Token(TokensType.Id,id));break;
                     case var space when Char.IsWhiteSpace(space):break;
                     default: throw new TokenError($"invalid token {input[pos]} at {pos}");
                 }
@@ -98,11 +111,8 @@ namespace Interpreter.Tokenize{
                 pos++;
             }
 
-            Tokens.AddLast(new Token(TokensType.Eof,null));
-        }
-
-        public override string ToString(){
-            return string.Join("\n",this.Tokens.Select(token => token.ToString()));
+            tokens.AddLast(new Token(TokensType.Eof,null));
+            return tokens;
         }
     }
 }

@@ -1,6 +1,6 @@
 using System;
 
-namespace Interpreter.Error {
+namespace PL.Error {
 
     public class TokenError:Exception{
 
@@ -19,6 +19,12 @@ namespace Interpreter.Error {
         public DivideByZeroError():base(){}
 
         public DivideByZeroError(string message):base(message) {}
+    }
+
+    public class ExecuteError:Exception{
+        public ExecuteError():base() {}
+
+        public ExecuteError(string message):base(message) {}
     }
 
 }
