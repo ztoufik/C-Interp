@@ -9,45 +9,47 @@ namespace PL.Parse {
         
         public Parser(){ }
 
-        public Statement_List Parse(LinkedList<Token> tokens){
-            return ParseStatements_List(tokens);
+        public Compound_Statement Parse(LinkedList<Token> tokens){
+            return ParseCompoundStatement(tokens);
         }
 
-        private Statement_List ParseStatements_List(LinkedList<Token> tokens){
-            if(tokens.Count==0){
-                throw new ParserError("invalid tokens stream");
+        private Compound_Statement ParseCompoundStatement(LinkedList<Token> tokens){
+            var firsttoken=tokens.First.Value;
+            if(firsttoken.type!=TokensType.Begin){
+                throw new ParserError("missing {");
             }
-
-            var statements_list=new Queue<Statement>();
-
-            var first_statement_tokens=new LinkedList<Token>();
-            var token=tokens.First.Value;
-            while(token.type!=TokensType.Semi){
-                first_statement_tokens.AddLast(token);
-                tokens.RemoveFirst();
-                if(tokens.Count==0){
-                    throw new ParserError("missing ;");
-                }
-            token=tokens.First.Value;
-            }
-            first_statement_tokens.AddLast(new Token(TokensType.Eof,null));
-            var first_statement=ParseStatement(first_statement_tokens);
-            statements_list.Enqueue(first_statement);
             tokens.RemoveFirst();
 
-            if(tokens.First.Value.type!=TokensType.Eof){
-                foreach(var stmt in ParseStatements_List(tokens).statements){
-                    statements_list.Enqueue(stmt);
+            var statement_list=new LinkedList<Statement>();
+            firsttoken=tokens.First.Value;
+
+            while(firsttoken.type!=TokensType.End){
+                statement_list.AddLast(ParseStatement(tokens));
+                if(tokens.First.Value.type!=TokensType.Semi){
+                    throw new ParserError("missing ;");
                 }
+                tokens.RemoveFirst();
+
+                if(tokens.Count<=0){
+                    throw new ParserError("missing }");
+                }
+
+                firsttoken=tokens.First.Value;
             }
 
-            return new Statement_List(statements_list.ToArray());
+            tokens.RemoveFirst();
 
+            return new Compound_Statement(statement_list);
         }
 
         private Statement ParseStatement(LinkedList<Token> tokens){
             if(tokens.Count<2){
                 throw new ParserError("invalid tokens stream");
+            }
+
+            var firsttoken=tokens.First.Value;
+            if(firsttoken.type==TokensType.Begin){
+                return ParseCompoundStatement(tokens);
             }
 
             var secondtoken=tokens.First.Next.Value;
@@ -81,12 +83,10 @@ namespace PL.Parse {
                 else {
                         AddtvNode= new SubExpr(AddtvNode,ParseMul(tokens));
                 }
-             token=tokens.First.Value;
+               token=tokens.First.Value;
             }
-            if(token.type==TokensType.Eof){
-                return AddtvNode;
-            }
-            throw new ParserError("expected operation");
+
+            return AddtvNode;
         }
 
         private Expr ParseMul(LinkedList<Token> tokens){
@@ -127,31 +127,15 @@ namespace PL.Parse {
             var node=tokens.First.Value;
 
             if(node.type==TokensType.LP){
-                int LPN=1;
                 tokens.RemoveFirst();
-                var tokensstream=new LinkedList<Token>();
-
-                while(LPN>0){
-                    node=tokens.First.Value;
-                    tokens.RemoveFirst();
-                    if(node.type==TokensType.LP){
-                        LPN++;
-                        continue;
-                    }
-
-                    if(node.type==TokensType.RP){
-                        LPN--;
-                        continue;
-                    }
-                    tokensstream.AddLast(node);
-                    if(tokens.Count<=0){
-                        throw new ParserError("missing )");
-                    }
+                var Term=ParseExpr(tokens);
+                node=tokens.First.Value;
+                if(node.type!=TokensType.RP){
+                    throw new ParserError("missing )");
                 }
-                tokensstream.AddLast(new Token(TokensType.Eof,null));
-                return ParseExpr(tokensstream);
+                tokens.RemoveFirst();
+                return Term;
             }
-
             return ParseTerm(tokens);
         }
 

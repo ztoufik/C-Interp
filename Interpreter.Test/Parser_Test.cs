@@ -15,19 +15,19 @@ namespace PL.Test.ParserTest
         private readonly Tokenizer _tokenizer;
         private Expr _expr;
         private Statement _statement;
-        private Statement_List _statement_list;
+        private Compound_Statement _compound_statement;
 
         public Parser_Test(){
             _tokenizer=new Tokenizer();
             _parser=new Parser();
         }
 
-        private void SetupStatementListParsing(string input){
+        private void SetupCompoundStatementParsing(string input){
             var tokens=this._tokenizer.Tokenize(input);
             Type parsertype=typeof(Parser);
             MethodInfo parsestmtlst=parsertype.GetMethods(BindingFlags.NonPublic|BindingFlags.Instance).
-                Where(x=>x.Name=="ParseStatements_List" && x.IsPrivate).First();
-            this._statement_list=(Statement_List)parsestmtlst.Invoke(_parser,new object[]{tokens});
+                Where(x=>x.Name=="ParseCompoundStatement" && x.IsPrivate).First();
+            this._compound_statement=(Compound_Statement)parsestmtlst.Invoke(_parser,new object[]{tokens});
         }
 
         private void SetupStatementParsing(string input){
@@ -53,17 +53,17 @@ namespace PL.Test.ParserTest
         }
 
         [Theory]
-        [InlineData("a;")]
-        [InlineData("3;")]
-        [InlineData("1+3;")]
-        [InlineData("A+b;")]
-        [InlineData("a=b;")]
-        [InlineData("a=b;3;")]
-        [InlineData("a=3*b;a=3;")]
-        public void Test_StatementListParse(string input)
+        [InlineData("{a;}")]
+        [InlineData("{3;}")]
+        [InlineData("{1+3;}")]
+        [InlineData("{A+b;}")]
+        [InlineData("{a=b;}")]
+        [InlineData("{a=b;3;}")]
+        [InlineData("{a=3*b;a=3;}")]
+        public void Test_compoundStatement(string input)
         {
-            SetupStatementListParsing(input);
-            Assert.IsType<Statement_List>(this._statement_list);
+            SetupCompoundStatementParsing(input);
+            Assert.IsType<Compound_Statement>(this._compound_statement);
         }
 
         [Theory]

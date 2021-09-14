@@ -10,7 +10,7 @@ namespace PL {
         readonly private Tokenizer _tokenzier;
         readonly private Parser _parser;
         private LinkedList<Token> _tokens;
-        private Statement_List _ast;
+        private Compound_Statement _ast;
         private string _input;
         private IDictionary<string,ObjNode> _scope;
 
@@ -24,7 +24,7 @@ namespace PL {
             //set {_tokens =value;}
         }
 
-        public Statement_List Ast{
+        public Compound_Statement Ast{
             get {return _ast;}
             //set {_ast =value;}
         }
@@ -49,19 +49,20 @@ namespace PL {
         public void Execute(){
             Tokenize();
             Parse();
-            Visit_Statments_List(this._ast);
+            Visit_Compound_Statment(this._ast);
         }
 
-        private void Visit_Statments_List(Statement_List stmts_list){
-            foreach(var stmt in stmts_list.statements){
+        private void Visit_Compound_Statment(Compound_Statement compound_statment){
+            foreach(var stmt in compound_statment.statement_list){
                 Visit_Statment(stmt);
             }
-
         }
+
         private void Visit_Statment(Statement stmt){
             switch(stmt){
                 case Expr expr:Visit_Expr(expr);break;
                 case Assign assign:VisitAssign(assign);break;
+                case Compound_Statement compound_statement:Visit_Compound_Statment(compound_statement);break;
             }
         }
 

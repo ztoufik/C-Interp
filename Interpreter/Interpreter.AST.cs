@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using PL.Error;
 
 namespace PL.AST {
@@ -126,15 +127,14 @@ namespace PL.AST {
             this._expr=expr;
         }
     }
-    
-    public class Statement_List{
 
-        private readonly Statement[] _statements;
+    public class Compound_Statement:Statement{
+        private readonly LinkedList<Statement> _statements_list;
 
-        public Statement[] statements {get {return this._statements;}}
+        public LinkedList<Statement> statement_list {get {return this._statements_list;}}
 
-        public Statement_List(Statement[] statements){
-            this._statements=statements;
+        public Compound_Statement(LinkedList<Statement> statement_list){
+            this._statements_list=statement_list;
         }
     }
 }

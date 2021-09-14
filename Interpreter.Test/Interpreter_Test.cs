@@ -17,8 +17,9 @@ namespace PL.Test.InterpreterTest
         }
 
         [Theory]
-        [InlineData("a=3;a=a+3;",6,"a")]
-        public void Test_Statements_List(string input,double expected,string varname)
+        [InlineData("{a=3;a=a+3;}",6,"a")]
+        [InlineData("{b=3;a=b+3;}",6,"a")]
+        public void Test_CompoundStatements(string input,double expected,string varname)
         {
             setup(input);
             var result=_interpreter.Scope[varname];
@@ -26,41 +27,41 @@ namespace PL.Test.InterpreterTest
         }
 
         [Theory]
-        [InlineData("a=3;",3,"a")]
-        [InlineData("a=0.3;",0.3,"a")]
-        [InlineData("a=1.0;",1.0,"a")]
-        [InlineData("a=10.34143;",10.34143,"a")]
-        [InlineData("a=3+4;",3+4,"a")]
-        [InlineData("a=3+4+4;",3+4+4,"a")]
-        [InlineData("a=3-4;",3-4,"a")]
-        [InlineData("a=3*4;",3*4,"a")]
-        [InlineData("a=3/4;",3/4.0,"a")]
-        [InlineData("a=3+4-6;",3+4-6,"a")]
-        [InlineData("a=3-4+6;",3-4+6,"a")]
-        [InlineData("a=3*4/2;",3*4/2.0,"a")]
-        [InlineData("a=3/4*2;",3/4.0*2,"a")]
-        [InlineData("a=3-4*6;",3-4*6,"a")]
-        [InlineData("a=3*4+6;",3*4+6,"a")]
-        [InlineData("a=3/4+6;",3/4.0+6,"a")]
-        [InlineData("a=3-4/6;",3-4/6.0,"a")]
-        [InlineData("a=(1);",1,"a")]
-        [InlineData("a=(1+2);",1+2,"a")]
-        [InlineData("a=(3-1);",3-1,"a")]
-        [InlineData("a=(4*4);",4*4,"a")]
-        [InlineData("a=(3/2);",3/2.0,"a")]
-        [InlineData("a=1+(3/2);",1+(3/2.0),"a")]
-        [InlineData("a=(1+3)/2;",(1+3)/2,"a")]
-        [InlineData("a=(1+3)*2;",(1+3)*2,"a")]
-        [InlineData("a=(((1+3)))-2;",(((1+3)))-2,"a")]
-        [InlineData("a=1+(3-2);",1+(3-2),"a")]
-        [InlineData("a=1-(3-2);",1-(3-2),"a")]
-        [InlineData("a=-1;",-1,"a")]
-        [InlineData("a=-(1);",-(1),"a")]
-        [InlineData("a=-1+1;",0,"a")]
-        [InlineData("a=-1-1;",-2,"a")]
-        [InlineData("a=-2*3;",-2*3,"a")]
-        [InlineData("a=-2/3;",-2/3.0,"a")]
-        [InlineData("a=-2-3*2;",-2-3*2,"a")]
+        [InlineData("{a=3;}",3,"a")]
+        [InlineData("{a=0.3;}",0.3,"a")]
+        [InlineData("{a=1.0;}",1.0,"a")]
+        [InlineData("{a=10.34143;}",10.34143,"a")]
+        [InlineData("{a=3+4;}",3+4,"a")]
+        [InlineData("{a=3+4+4;}",3+4+4,"a")]
+        [InlineData("{a=3-4;}",3-4,"a")]
+        [InlineData("{a=3*4;}",3*4,"a")]
+        [InlineData("{a=3/4;}",3/4.0,"a")]
+        [InlineData("{a=3+4-6;}",3+4-6,"a")]
+        [InlineData("{a=3-4+6;}",3-4+6,"a")]
+        [InlineData("{a=3*4/2;}",3*4/2.0,"a")]
+        [InlineData("{a=3/4*2;}",3/4.0*2,"a")]
+        [InlineData("{a=3-4*6;}",3-4*6,"a")]
+        [InlineData("{a=3*4+6;}",3*4+6,"a")]
+        [InlineData("{a=3/4+6;}",3/4.0+6,"a")]
+        [InlineData("{a=3-4/6;}",3-4/6.0,"a")]
+        [InlineData("{a=(1);}",1,"a")]
+        [InlineData("{a=(1+2);}",1+2,"a")]
+        [InlineData("{a=(3-1);}",3-1,"a")]
+        [InlineData("{a=(4*4);}",4*4,"a")]
+        [InlineData("{a=(3/2);}",3/2.0,"a")]
+        [InlineData("{a=1+(3/2);}",1+(3/2.0),"a")]
+        [InlineData("{a=(1+3)/2;}",(1+3)/2,"a")]
+        [InlineData("{a=(1+3)*2;}",(1+3)*2,"a")]
+        [InlineData("{a=(((1+3)))-2;}",(((1+3)))-2,"a")]
+        [InlineData("{a=1+(3-2);}",1+(3-2),"a")]
+        [InlineData("{a=1-(3-2);}",1-(3-2),"a")]
+        [InlineData("{a=-1;}",-1,"a")]
+        [InlineData("{a=-(1);}",-(1),"a")]
+        [InlineData("{a=-1+1;}",0,"a")]
+        [InlineData("{a=-1-1;}",-2,"a")]
+        [InlineData("{a=-2*3;}",-2*3,"a")]
+        [InlineData("{a=-2/3;}",-2/3.0,"a")]
+        [InlineData("{a=-2-3*2;}",-2-3*2,"a")]
         public void Test_Assignement_Expression(string input,double expected,string varname)
         {
             setup(input);
@@ -69,8 +70,8 @@ namespace PL.Test.InterpreterTest
         }
 
         [Theory]
-        [InlineData("3/0;")]
-        [InlineData("0/0;")]
+        [InlineData("{3/0;}")]
+        [InlineData("{0/0;}")]
         public void Test_DivideByZero(string input)
         {
             _interpreter.Input=input;
