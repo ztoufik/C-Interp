@@ -73,35 +73,75 @@ namespace PL {
         private ObjNode Visit_Expr(Expr expr){
             switch(expr){
                 case Id id:
-                    if(!this._scope.Keys.Contains(id.VarName)){
-                        throw new ExecuteError("indefined identifier");
-                    }
-                        return this._scope[id.VarName];
+                    return Visit_Id(id);
 
                 case ObjNode objnode:
                     return objnode;
 
-                case AddExpr addexpr:
-                    return (Number)(Visit_Expr(addexpr.Left))+(Number)(Visit_Expr(addexpr.Right));
+                case ArthmExpr arthmExpr:
+                    return Visit_ArthmExpr(arthmExpr);
 
-                case SubExpr subexpr:
-                    return (Number)(Visit_Expr(subexpr.Left))-(Number)(Visit_Expr(subexpr.Right));
-
-                case MulExpr mulexpr:
-                    return (Number)(Visit_Expr(mulexpr.Left))*(Number)(Visit_Expr(mulexpr.Right));
-
-                case DivExpr divexpr:
-                    return (Number)(Visit_Expr(divexpr.Left))/(Number)(Visit_Expr(divexpr.Right));
-
-                case PlusExpr plusexpr:
-                    return Visit_Expr(plusexpr.Op);
-
-                case MinusExpr minusexpr:
-                    return new Number("-1")*(Number)Visit_Expr(minusexpr.Op);
-
+                case UnExpr unexpr:
+                    return Visit_UnExpr(unexpr);
 
                 default: throw new ExecuteError("indefined AST Node");
             }
+        }
+
+        private Number Visit_ArthmExpr(ArthmExpr expr){
+            Number left=CheckType(expr.Left);
+            Number right=CheckType(expr.Right);
+            switch(expr){
+                case AddExpr addexpr:
+                    return left+right;
+
+                case SubExpr subexpr:
+                    return left-right;
+
+                case MulExpr mulexpr:
+                    return left*right;
+
+                case DivExpr divexpr:
+                    return left/right;
+
+                default: throw new ExecuteError("indefined AST Node");
+            }
+        }
+
+        private Number Visit_UnExpr(UnExpr expr){
+            var op=CheckType(expr.Op);
+            switch(expr){
+                case PlusExpr plusexpr:
+                    return op;
+
+                case MinusExpr minusexpr:
+                    return new Number("-1")*op;
+
+                default: throw new ExecuteError("indefined AST Node");
+            }
+        }
+
+        private ObjNode Visit_Id(Id id){
+            if(!this._scope.Keys.Contains(id.VarName)){
+                throw new ExecuteError("indefined identifier");
+            }
+            return this._scope[id.VarName];
+        }
+
+        private Number CheckType(Expr expr){
+            switch(expr){
+                case Number number:return number;
+                case ArthmExpr arthmExpr: return Visit_ArthmExpr(arthmExpr);
+                case UnExpr unexpr: return Visit_UnExpr(unexpr);
+                case Id id:
+                      var Value=Visit_Id(id);
+                      if(Value.GetType()!=typeof(Number)){
+                        throw new ExecuteError("expected Number");
+                      }
+                      return (Number)Value;
+                default:throw new ExecuteError("type expression or identifier");
+            }
+
         }
     }
 }

@@ -70,7 +70,6 @@ namespace PL.Parse {
         }
 
         private Expr ParseExpr(LinkedList<Token> tokens){
-
             Expr AddtvNode=ParseMul(tokens);
 
             var token=tokens.First.Value;
@@ -90,7 +89,6 @@ namespace PL.Parse {
         }
 
         private Expr ParseMul(LinkedList<Token> tokens){
-
             Expr MultplNode=ParseUnOpr(tokens);
 
             var token=tokens.First.Value;
@@ -109,21 +107,20 @@ namespace PL.Parse {
         }
 
         private Expr ParseUnOpr(LinkedList<Token> tokens){
-
             var node=tokens.First.Value;
-            switch(node.type){
-                case TokensType.Add:
-                    tokens.RemoveFirst();
-                    return new PlusExpr(ParseParenth(tokens));
-                case TokensType.Sub:
-                    tokens.RemoveFirst();
-                    return new MinusExpr(ParseParenth(tokens));
-                default:return ParseParenth(tokens);
+            if((node.type==TokensType.Add)||(node.type==TokensType.Sub)){
+                tokens.RemoveFirst();
+                switch(node.type){
+                    case TokensType.Add:
+                        return new PlusExpr(ParseParenth(tokens));
+                    case TokensType.Sub:
+                        return new MinusExpr(ParseParenth(tokens));
+                }
             }
+            return ParseParenth(tokens);
         }
 
         private Expr ParseParenth(LinkedList<Token> tokens){
-
             var node=tokens.First.Value;
 
             if(node.type==TokensType.LP){
@@ -139,8 +136,7 @@ namespace PL.Parse {
             return ParseTerm(tokens);
         }
 
-        private Expr ParseTerm(LinkedList<Token> tokens){
-
+        private ObjNode ParseTerm(LinkedList<Token> tokens){
             if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
