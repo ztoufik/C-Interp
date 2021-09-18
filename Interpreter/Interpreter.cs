@@ -81,16 +81,16 @@ namespace PL {
                 case ArthmExpr arthmExpr:
                     return Visit_ArthmExpr(arthmExpr);
 
-                case UnExpr unexpr:
-                    return Visit_UnExpr(unexpr);
+                case UnArthmExpr unarthmexpr:
+                    return Visit_UnArthmExpr(unarthmexpr);
 
                 default: throw new ExecuteError("indefined AST Node");
             }
         }
 
         private Number Visit_ArthmExpr(ArthmExpr expr){
-            Number left=CheckType(expr.Left);
-            Number right=CheckType(expr.Right);
+            Number left=(Number)Visit_Expr(expr.Left);
+            Number right=(Number)Visit_Expr(expr.Right);
             switch(expr){
                 case AddExpr addexpr:
                     return left+right;
@@ -108,8 +108,8 @@ namespace PL {
             }
         }
 
-        private Number Visit_UnExpr(UnExpr expr){
-            var op=CheckType(expr.Op);
+        private Number Visit_UnArthmExpr(UnArthmExpr expr){
+            var op=(Number)(Visit_Expr(expr.Op));
             switch(expr){
                 case PlusExpr plusexpr:
                     return op;
@@ -126,22 +126,6 @@ namespace PL {
                 throw new ExecuteError("indefined identifier");
             }
             return this._scope[id.VarName];
-        }
-
-        private Number CheckType(Expr expr){
-            switch(expr){
-                case Number number:return number;
-                case ArthmExpr arthmExpr: return Visit_ArthmExpr(arthmExpr);
-                case UnExpr unexpr: return Visit_UnExpr(unexpr);
-                case Id id:
-                      var Value=Visit_Id(id);
-                      if(Value.GetType()!=typeof(Number)){
-                        throw new ExecuteError("expected Number");
-                      }
-                      return (Number)Value;
-                default:throw new ExecuteError("type expression or identifier");
-            }
-
         }
     }
 }

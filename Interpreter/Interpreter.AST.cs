@@ -64,6 +64,16 @@ namespace PL.AST {
 
     }
 
+    public class Str:ObjNode {
+        public Str(string Value):base(Value.ToString()) {
+        }
+
+        static public Str operator +(Str own,Str other){
+            var concat=own.Value.ToString()+other.Value.ToString();
+            return new Str(concat);
+        }
+    }
+
     abstract public class BinExpr:Expr {
         protected readonly Expr _left;
         protected readonly Expr _right;
@@ -79,7 +89,10 @@ namespace PL.AST {
 
     abstract public class ArthmExpr:BinExpr {
         public ArthmExpr(Expr left,Expr right):base(left,right) {
+            Utils.CheckArthmType(left);
+            Utils.CheckArthmType(right);
         }
+
     }
 
     public class AddExpr:ArthmExpr {
@@ -98,6 +111,14 @@ namespace PL.AST {
         public DivExpr(Expr left,Expr right):base(left,right) {}
     }
 
+    abstract public class StrConct:BinExpr {
+        public StrConct(Expr left,Expr right):base(left,right) {
+            Utils.CheckStrType(left);
+            Utils.CheckStrType(right);
+        }
+
+    }
+
     abstract public class UnExpr:Expr {
         protected readonly Expr _Op;
         public Expr Op{get{return _Op;}}
@@ -107,11 +128,17 @@ namespace PL.AST {
         }
     }
 
-    public class PlusExpr:UnExpr {
+    abstract public class UnArthmExpr:UnExpr {
+        public UnArthmExpr(Expr Op):base(Op) {
+            Utils.CheckArthmType(Op);
+        }
+    }
+
+    public class PlusExpr:UnArthmExpr {
         public PlusExpr(Expr Op):base(Op) {}
     }
 
-    public class MinusExpr:UnExpr {
+    public class MinusExpr:UnArthmExpr {
         public MinusExpr(Expr Op):base(Op) {}
     }
 
@@ -135,6 +162,27 @@ namespace PL.AST {
 
         public Compound_Statement(LinkedList<Statement> statement_list){
             this._statements_list=statement_list;
+        }
+    }
+
+    internal static class Utils{
+        public static void CheckArthmType(Expr expr){
+            switch(expr){
+                case ArthmExpr arthmExpr:break;
+                case UnArthmExpr unarthmexpr:break;
+                case Number number:break;
+                case Id id:break;
+                default: throw new ParserError("operand must be arthmetic type");
+            }
+        }
+
+        public static void CheckStrType(Expr expr){
+            switch(expr){
+                case StrConct arthmExpr:break;
+                case Str str:break;
+                case Id id:break;
+                default: throw new ParserError("operand must be string type");
+            }
         }
     }
 }

@@ -6,7 +6,7 @@ using PL.Error;
 namespace PL.Tokenize{
 
     public enum TokensType{
-        Number,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,Id,Eof
+        Number,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,str,Eof
     }
 
     public struct Token {
@@ -66,7 +66,7 @@ namespace PL.Tokenize{
             return number.ToString();
         }
 
-        private string ID(in string input,ref int pos){
+        private string Str(in string input,ref int pos){
             StringBuilder id=new StringBuilder(10);
             while (pos<input.Length){
                 if(Char.IsLetterOrDigit(input[pos])) {
@@ -97,13 +97,14 @@ namespace PL.Tokenize{
                     case '}':tokens.AddLast(new Token(TokensType.End,"}"));break;
                     case ';':tokens.AddLast(new Token(TokensType.Semi,";"));break;
                     case '=':tokens.AddLast(new Token(TokensType.Assign,"="));break;
+                    case '"':tokens.AddLast(new Token(TokensType.DQ,"\""));break;
                     case var digit when Char.IsDigit(digit):
                             tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
                     case var alpha when Char.IsLetter(alpha):
-                            string id=ID(input,ref pos);
+                            string id=Str(input,ref pos);
                             //if(KeyWords.ContainsKey(id)){
                              //       }
-                            tokens.AddLast(new Token(TokensType.Id,id));break;
+                            tokens.AddLast(new Token(TokensType.str,id));break;
                     case var space when Char.IsWhiteSpace(space):break;
                     default: throw new TokenError($"invalid token {input[pos]} at {pos}");
                 }

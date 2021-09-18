@@ -25,6 +25,7 @@ namespace PL.Test.TokenizerTest
         [InlineData("-")]
         [InlineData("*")]
         [InlineData("/")]
+        [InlineData("\"")]
         [InlineData("3*3")]
         [InlineData("3-4/3")]
         [InlineData("a=b")]
@@ -49,6 +50,7 @@ namespace PL.Test.TokenizerTest
         [InlineData("}",TokensType.End)]
         [InlineData(";",TokensType.Semi)]
         [InlineData("=",TokensType.Assign)]
+        [InlineData("\"",TokensType.DQ)]
         public void Test_TokenKeyWords_Type(string input,TokensType type) {
             setup(input);
             var result=_tokens.First.Value.type;
@@ -67,6 +69,7 @@ namespace PL.Test.TokenizerTest
         [InlineData("}")]
         [InlineData(";")]
         [InlineData("=")]
+        [InlineData("\"")]
         public void Test_TokenKeyWords_Value(string input) {
             setup(input);
             var result=_tokens.First.Value.Value;
@@ -76,7 +79,7 @@ namespace PL.Test.TokenizerTest
         [Theory]
         [InlineData("3",TokensType.Number)]
         [InlineData("0.3",TokensType.Number)]
-        [InlineData("test",TokensType.Id)]
+        [InlineData("test",TokensType.str)]
         public void Test_Tokens_Type(string input,TokensType type) {
             setup(input);
             var result=_tokens.First.Value.type;
@@ -95,6 +98,7 @@ namespace PL.Test.TokenizerTest
 
         [Theory]
         [InlineData("3",1)]
+        [InlineData("\"",1)]
         [InlineData("test",1)]
         [InlineData("+",1)]
         [InlineData("-",1)]

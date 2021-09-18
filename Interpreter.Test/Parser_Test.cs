@@ -118,6 +118,7 @@ namespace PL.Test.ParserTest
         [InlineData("3",typeof(Number))]
         [InlineData("0.3",typeof(Number))]
         [InlineData("test",typeof(Id))]
+        [InlineData("\"test\"",typeof(Str))]
         public void Test_ObjNodeType(string input,Type expected)
         {
             SetupExprParsing(input);
@@ -128,6 +129,7 @@ namespace PL.Test.ParserTest
         [InlineData("0.3",typeof(ObjNode))]
         [InlineData("0.03",typeof(ObjNode))]
         [InlineData("test",typeof(ObjNode))]
+        [InlineData("\" test\"",typeof(ObjNode))]
         public void Test_ObjNode(string input,Type expected)
         {
             SetupExprParsing(input);
@@ -136,11 +138,12 @@ namespace PL.Test.ParserTest
 
         [Theory]
         [InlineData(" ;")]
-        [InlineData("0test;")]
-        [InlineData("+*;")]
-        [InlineData("(1;")]
-        [InlineData("1);")]
-        [InlineData("a=;")]
+        [InlineData("{0test;}")]
+        [InlineData("{+*;}")]
+        [InlineData("{(1;}")]
+        [InlineData("{1);}")]
+        [InlineData("{a=;}")]
+        [InlineData("{\" test;}")]
         public void Test_ParseError(string input)
         {
             Assert.Throws<ParserError>(()=>SetupParsing(input));

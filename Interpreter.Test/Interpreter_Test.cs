@@ -62,13 +62,21 @@ namespace PL.Test.InterpreterTest
         [InlineData("{a=-2*3;}",-2*3,"a")]
         [InlineData("{a=-2/3;}",-2/3.0,"a")]
         [InlineData("{a=-2-3*2;}",-2-3*2,"a")]
-        public void Test_Assignement_Expression(string input,double expected,string varname)
+        public void Test_Arthm_Assignement_Expression(string input,double expected,string varname)
         {
             setup(input);
             var result=_interpreter.Scope[varname];
             Assert.Equal(expected.ToString(),result.ToString());
         }
 
+        [Theory]
+        [InlineData("{a=\"test\";}","test","a")]
+        public void Test_Str_Assignement_Expression(string input,string expected,string varname)
+        {
+            setup(input);
+            var result=_interpreter.Scope[varname];
+            Assert.Equal(expected,result.ToString());
+        }
         [Theory]
         [InlineData("{3/0;}")]
         [InlineData("{0/0;}")]
