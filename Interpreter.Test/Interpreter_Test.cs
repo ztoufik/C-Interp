@@ -85,5 +85,13 @@ namespace PL.Test.InterpreterTest
             _interpreter.Input=input;
             Assert.Throws<DivideByZeroError>(()=>_interpreter.Execute());
         }
+
+        [Theory]
+        [InlineData("{a=\"test\";a+1;}")]
+        public void Test_ExecuteError(string input)
+        {
+            _interpreter.Input=input;
+            Assert.Throws<ExecuteError>(()=>_interpreter.Execute());
+        }
     }
 }

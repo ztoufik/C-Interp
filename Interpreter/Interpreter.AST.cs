@@ -86,6 +86,13 @@ namespace PL.AST {
             this._right=right;
         }
     }
+    abstract public class StrConct:BinExpr {
+            public StrConct(Expr left,Expr right):base(left,right) {
+                Utils.CheckStrType(left);
+                Utils.CheckStrType(right);
+            }
+
+        }
 
     abstract public class ArthmExpr:BinExpr {
         public ArthmExpr(Expr left,Expr right):base(left,right) {
@@ -111,13 +118,7 @@ namespace PL.AST {
         public DivExpr(Expr left,Expr right):base(left,right) {}
     }
 
-    abstract public class StrConct:BinExpr {
-        public StrConct(Expr left,Expr right):base(left,right) {
-            Utils.CheckStrType(left);
-            Utils.CheckStrType(right);
-        }
-
-    }
+    
 
     abstract public class UnExpr:Expr {
         protected readonly Expr _Op;
@@ -165,24 +166,4 @@ namespace PL.AST {
         }
     }
 
-    internal static class Utils{
-        public static void CheckArthmType(Expr expr){
-            switch(expr){
-                case ArthmExpr arthmExpr:break;
-                case UnArthmExpr unarthmexpr:break;
-                case Number number:break;
-                case Id id:break;
-                default: throw new ParserError("operand must be arthmetic type");
-            }
-        }
-
-        public static void CheckStrType(Expr expr){
-            switch(expr){
-                case StrConct arthmExpr:break;
-                case Str str:break;
-                case Id id:break;
-                default: throw new ParserError("operand must be string type");
-            }
-        }
-    }
 }

@@ -5,9 +5,7 @@ using PL.AST;
 using PL.Error;
 
 namespace PL.Parse {
-
     public class Parser{
-        
         public Parser(){ }
 
         public Compound_Statement Parse(LinkedList<Token> tokens){

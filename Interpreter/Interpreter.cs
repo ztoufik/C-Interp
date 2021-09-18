@@ -89,8 +89,8 @@ namespace PL {
         }
 
         private Number Visit_ArthmExpr(ArthmExpr expr){
-            Number left=(Number)Visit_Expr(expr.Left);
-            Number right=(Number)Visit_Expr(expr.Right);
+            Number left=ShouldReturnNumber(expr.Left);
+            Number right=ShouldReturnNumber(expr.Right);
             switch(expr){
                 case AddExpr addexpr:
                     return left+right;
@@ -109,7 +109,7 @@ namespace PL {
         }
 
         private Number Visit_UnArthmExpr(UnArthmExpr expr){
-            var op=(Number)(Visit_Expr(expr.Op));
+            var op=ShouldReturnNumber(expr.Op);
             switch(expr){
                 case PlusExpr plusexpr:
                     return op;
@@ -127,5 +127,38 @@ namespace PL {
             }
             return this._scope[id.VarName];
         }
+
+        private Number ShouldReturnNumber(Expr expr){
+            if(expr is Id){
+                ObjNode variable=this.Visit_Id((Id)expr);
+                if(!(variable is Number)){
+                    throw new ExecuteError("expected number variable");
+                }
+                return (Number)variable;
+            }
+            return (Number)Visit_Expr(expr);
+        }
+    }
+
+    static class Utils{
+        public static void CheckArthmType(Expr expr){
+            switch(expr){
+                case ArthmExpr arthmExpr:break;
+                case UnArthmExpr unarthmexpr:break;
+                case Number number:break;
+                case Id id:break;
+                default: throw new ParserError("operand must be arthmetic type");
+            }
+        }
+
+        public static void CheckStrType(Expr expr){
+            switch(expr){
+                case StrConct arthmExpr:break;
+                case Str str:break;
+                case Id id:break;
+                default: throw new ParserError("operand must be string type");
+            }
+        }
+
     }
 }
