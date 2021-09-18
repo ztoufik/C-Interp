@@ -98,6 +98,12 @@ namespace PL.Tokenize{
                     case ';':tokens.AddLast(new Token(TokensType.Semi,";"));break;
                     case '=':tokens.AddLast(new Token(TokensType.Assign,"="));break;
                     case '"':tokens.AddLast(new Token(TokensType.DQ,"\""));break;
+                    case '#':do{
+                                 pos++;
+                                 if(pos>=input.Length){
+                                     break;
+                                     }
+                                 }while(input[pos]!='#');break;                            
                     case var digit when Char.IsDigit(digit):
                             tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
                     case var alpha when Char.IsLetter(alpha):

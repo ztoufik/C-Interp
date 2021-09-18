@@ -78,6 +78,7 @@ namespace PL.Test.InterpreterTest
             var result=_interpreter.Scope[varname];
             Assert.Equal(expected,result.ToString());
         }
+
         [Theory]
         [InlineData("{3/0;}")]
         [InlineData("{0/0;}")]

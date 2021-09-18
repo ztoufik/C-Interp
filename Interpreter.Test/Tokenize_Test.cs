@@ -97,6 +97,15 @@ namespace PL.Test.TokenizerTest
         }
 
         [Theory]
+        [InlineData(";#comment#",1)]
+        [InlineData("{a;#test#}",4)]
+        public void Test_Comments(string input,int count) {
+            setup(input);
+            var result=_tokens.Count;
+            Assert.Equal(count+1,result);
+        }
+
+        [Theory]
         [InlineData("3",1)]
         [InlineData("\"",1)]
         [InlineData("test",1)]
@@ -120,6 +129,5 @@ namespace PL.Test.TokenizerTest
         {
             Assert.Throws<TokenError>(()=>_tokenize.Tokenize(input));
         }
-
     }
 }
