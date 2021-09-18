@@ -71,6 +71,7 @@ namespace PL.Test.InterpreterTest
 
         [Theory]
         [InlineData("{a=\"test\";}","test","a")]
+        [InlineData("{a=\"1\"+\"2\";}","12","a")]
         public void Test_Str_Assignement_Expression(string input,string expected,string varname)
         {
             setup(input);

@@ -8,12 +8,13 @@ namespace PL.AST {
     }
 
     abstract public class Expr:Statement {
+        public Expr():base(){}
     }
 
     public abstract class ObjNode:Expr {
         protected readonly object Value;
 
-        public ObjNode(object Value) {
+        public ObjNode(object Value):base() {
             this.Value=Value;
         }
 
@@ -21,6 +22,8 @@ namespace PL.AST {
             return this.Value.ToString();
         }
     }
+
+    // types
 
     public class Number:ObjNode {
         public Number(string Value):base(double.Parse(Value)) {
@@ -74,74 +77,57 @@ namespace PL.AST {
         }
     }
 
-    abstract public class BinExpr:Expr {
+    abstract public class BinOp:Expr {
         protected readonly Expr _left;
         protected readonly Expr _right;
 
         public Expr Left{ get {return _left;}}
         public Expr Right{ get {return _right;}}
 
-        public BinExpr(Expr left,Expr right) {
+        public BinOp(Expr left,Expr right):base() {
             this._left=left;
             this._right=right;
         }
     }
-    abstract public class StrConct:BinExpr {
-            public StrConct(Expr left,Expr right):base(left,right) {
-                Utils.CheckStrType(left);
-                Utils.CheckStrType(right);
-            }
 
-        }
+    // unary operations
 
-    abstract public class ArthmExpr:BinExpr {
-        public ArthmExpr(Expr left,Expr right):base(left,right) {
-            Utils.CheckArthmType(left);
-            Utils.CheckArthmType(right);
-        }
-
-    }
-
-    public class AddExpr:ArthmExpr {
-        public AddExpr(Expr left,Expr right):base(left,right) {}
-    }
-
-    public class SubExpr:ArthmExpr {
-        public SubExpr(Expr left,Expr right):base(left,right) {}
-    }
-
-    public class MulExpr:ArthmExpr {
-        public MulExpr(Expr left,Expr right):base(left,right) {}
-    }
-
-    public class DivExpr:ArthmExpr {
-        public DivExpr(Expr left,Expr right):base(left,right) {}
-    }
-
-    
-
-    abstract public class UnExpr:Expr {
+    abstract public class UnOp:Expr {
         protected readonly Expr _Op;
         public Expr Op{get{return _Op;}}
 
-        public UnExpr(Expr Op) {
+        public UnOp(Expr Op):base() {
             this._Op=Op;
         }
     }
 
-    abstract public class UnArthmExpr:UnExpr {
-        public UnArthmExpr(Expr Op):base(Op) {
-            Utils.CheckArthmType(Op);
-        }
+    // arthemtic operations
+
+    public class AddExpr:BinOp {
+        public AddExpr(Expr left,Expr right):base(left,right) {}
     }
 
-    public class PlusExpr:UnArthmExpr {
+    public class SubExpr:BinOp {
+        public SubExpr(Expr left,Expr right):base(left,right) {}
+    }
+
+    public class MulExpr:BinOp {
+        public MulExpr(Expr left,Expr right):base(left,right) {}
+    }
+
+    public class DivExpr:BinOp {
+        public DivExpr(Expr left,Expr right):base(left,right) {}
+    }
+
+    public class PlusExpr:UnOp {
         public PlusExpr(Expr Op):base(Op) {}
     }
 
-    public class MinusExpr:UnArthmExpr {
+    public class MinusExpr:UnOp {
         public MinusExpr(Expr Op):base(Op) {}
     }
+
+    // statements
 
     public class Assign:Statement {
         private Id _id;
@@ -161,7 +147,7 @@ namespace PL.AST {
 
         public LinkedList<Statement> statement_list {get {return this._statements_list;}}
 
-        public Compound_Statement(LinkedList<Statement> statement_list){
+        public Compound_Statement(LinkedList<Statement> statement_list):base(){
             this._statements_list=statement_list;
         }
     }

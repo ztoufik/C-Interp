@@ -78,87 +78,74 @@ namespace PL {
                 case ObjNode objnode:
                     return objnode;
 
-                case ArthmExpr arthmExpr:
-                    return Visit_ArthmExpr(arthmExpr);
+                case BinOp binop:
+                    return Visit_BinOp(binop);
 
-                case UnArthmExpr unarthmexpr:
-                    return Visit_UnArthmExpr(unarthmexpr);
+                case UnOp unop:
+                    return Visit_UnOp(unop);
 
                 default: throw new ExecuteError("indefined AST Node");
             }
         }
 
-        private Number Visit_ArthmExpr(ArthmExpr expr){
-            Number left=ShouldReturnNumber(expr.Left);
-            Number right=ShouldReturnNumber(expr.Right);
-            switch(expr){
+        private ObjNode Visit_BinOp(BinOp binop){
+            var left=Visit_Expr(binop.Left);
+            var right=Visit_Expr(binop.Right);
+            switch(binop){
                 case AddExpr addexpr:
-                    return left+right;
+                    if((left is Number)&&(right is Number)){
+                            return (Number)left+(Number)right;
+                        }
+
+                    if((left is Str)&&(right is Str)){
+                            return (Str)left+(Str)right;
+                        }
+                    throw new ExecuteError("type mismatch");
 
                 case SubExpr subexpr:
-                    return left-right;
-
+                    if((left is Number)&&(right is Number)){
+                            return (Number)left-(Number)right;
+                        }
+                    throw new ExecuteError("only arthmtic types can be substracted");
+                     
                 case MulExpr mulexpr:
-                    return left*right;
+                    if((left is Number)&&(right is Number)){
+                            return (Number)left*(Number)right;
+                        }
+                    throw new ExecuteError("only arthmtic types can be Multiplied");
 
                 case DivExpr divexpr:
-                    return left/right;
+                    if((left is Number)&&(right is Number)){
+                            return (Number)left/(Number)right;
+                        }
+                    throw new ExecuteError("only arthmtic types can be Divided");
 
-                default: throw new ExecuteError("indefined AST Node");
-            }
+                default: throw new ExecuteError("invalid op");
+                }
         }
 
-        private Number Visit_UnArthmExpr(UnArthmExpr expr){
-            var op=ShouldReturnNumber(expr.Op);
-            switch(expr){
+        private ObjNode Visit_UnOp(UnOp unop){
+            var op=Visit_Expr(unop.Op);
+            switch(unop){
                 case PlusExpr plusexpr:
-                    return op;
+                    if(op is Number){
+                        return (Number)op;
+                    }
+                    throw new ExecuteError("expected Number operand");
 
                 case MinusExpr minusexpr:
-                    return new Number("-1")*op;
-
-                default: throw new ExecuteError("indefined AST Node");
+                    if(op is Number){
+                        return new Number("-1")*(Number)op;
+                    }
+                    throw new ExecuteError("expected Number operand");
+                default: throw new ExecuteError("invalid op");
             }
         }
-
         private ObjNode Visit_Id(Id id){
             if(!this._scope.Keys.Contains(id.VarName)){
                 throw new ExecuteError("indefined identifier");
             }
             return this._scope[id.VarName];
         }
-
-        private Number ShouldReturnNumber(Expr expr){
-            if(expr is Id){
-                ObjNode variable=this.Visit_Id((Id)expr);
-                if(!(variable is Number)){
-                    throw new ExecuteError("expected number variable");
-                }
-                return (Number)variable;
-            }
-            return (Number)Visit_Expr(expr);
-        }
-    }
-
-    static class Utils{
-        public static void CheckArthmType(Expr expr){
-            switch(expr){
-                case ArthmExpr arthmExpr:break;
-                case UnArthmExpr unarthmexpr:break;
-                case Number number:break;
-                case Id id:break;
-                default: throw new ParserError("operand must be arthmetic type");
-            }
-        }
-
-        public static void CheckStrType(Expr expr){
-            switch(expr){
-                case StrConct arthmExpr:break;
-                case Str str:break;
-                case Id id:break;
-                default: throw new ParserError("operand must be string type");
-            }
-        }
-
-    }
+   }
 }
