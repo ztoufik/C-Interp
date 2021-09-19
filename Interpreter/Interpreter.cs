@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections.Generic;
 using PL.Tokenize;
 using PL.AST;
@@ -46,10 +47,39 @@ namespace PL {
             this._ast=this._parser.Parse(this._tokens);
         }
 
-        public void Execute(){
+        public void Execute(string statement){
+            this.Input=statement;
             Tokenize();
             Parse();
             Visit_Compound_Statment(this._ast);
+        }
+
+        public void Load(string filepath){
+            string cwd=Directory.GetCurrentDirectory();
+            string cfilepath=string.Join($"{Path.DirectorySeparatorChar}",new string[2]{cwd,filepath});
+            if(!File.Exists(cfilepath)){
+                throw new ExecuteError($"{cfilepath} can't be found in the current directory");
+            }
+            int linenr=0;
+            foreach(string line in File.ReadLines(cfilepath)){
+                try{
+                    this.Execute(line);
+                }
+                catch(TokenError e){
+                    string message=e.Message;
+                    throw new TokenError($"{message} line:{linenr} file:{cfilepath}");
+                }
+                catch(ParserError e){
+                    string message=e.Message;
+                    throw new ParserError($"{message} line:{linenr} file:{cfilepath}");
+                }
+                catch(ExecuteError e){
+                    string message=e.Message;
+                    throw new ExecuteError($"{message} line:{linenr} file:{cfilepath}");
+                }
+                linenr++;
+            }
+
         }
 
         private void Visit_Compound_Statment(Compound_Statement compound_statment){

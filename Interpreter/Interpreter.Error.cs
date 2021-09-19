@@ -3,7 +3,6 @@ using System;
 namespace PL.Error {
 
     public class TokenError:Exception{
-
         public TokenError():base() {}
 
         public TokenError(string message):base(message) {}

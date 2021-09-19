@@ -12,8 +12,7 @@ namespace PL.Test.InterpreterTest
         }
 
         private void setup(string input){
-            _interpreter.Input=input;
-            _interpreter.Execute();
+            _interpreter.Execute(input);
         }
 
         [Theory]
@@ -79,21 +78,26 @@ namespace PL.Test.InterpreterTest
             Assert.Equal(expected,result.ToString());
         }
 
+        [Fact]
+        public void Test_Load_File() {
+            _interpreter.Load("load");
+            var result=_interpreter.Scope["a"];
+            Assert.Equal("6",result.ToString());
+        }
+
         [Theory]
         [InlineData("{3/0;}")]
         [InlineData("{0/0;}")]
         public void Test_DivideByZero(string input)
         {
-            _interpreter.Input=input;
-            Assert.Throws<DivideByZeroError>(()=>_interpreter.Execute());
+            Assert.Throws<DivideByZeroError>(()=>_interpreter.Execute(input));
         }
 
         [Theory]
         [InlineData("{a=\"test\";a+1;}")]
         public void Test_ExecuteError(string input)
         {
-            _interpreter.Input=input;
-            Assert.Throws<ExecuteError>(()=>_interpreter.Execute());
+            Assert.Throws<ExecuteError>(()=>_interpreter.Execute(input));
         }
     }
 }
