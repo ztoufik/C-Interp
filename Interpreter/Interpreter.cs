@@ -91,13 +91,19 @@ namespace PL {
         private void Visit_Statment(Statement stmt){
             switch(stmt){
                 case Expr expr:Visit_Expr(expr);break;
-                case Assign assign:VisitAssign(assign);break;
+                case Assign assign:Visit_Assign(assign);break;
                 case Compound_Statement compound_statement:Visit_Compound_Statment(compound_statement);break;
+                case Import import:Visit_Import(import);break;
+                default:throw new ExecuteError("indefined statement node type");
             }
         }
 
-        private void VisitAssign(Assign assign){
+        private void Visit_Assign(Assign assign){
             this._scope[assign.Id.VarName]=Visit_Expr(assign.expr);
+        }
+
+        private void Visit_Import(Import import){
+            this.Load(import.ScriptFile);
         }
 
         private ObjNode Visit_Expr(Expr expr){

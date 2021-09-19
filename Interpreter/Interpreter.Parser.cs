@@ -47,8 +47,11 @@ namespace PL.Parse {
             }
 
             var firsttoken=tokens.First.Value;
-            if(firsttoken.type==TokensType.Begin){
-                return ParseCompoundStatement(tokens);
+            switch(firsttoken.type){
+                case TokensType.Begin: 
+                    return ParseCompoundStatement(tokens);
+                case TokensType.Get:
+                    return ParseImport(tokens);
             }
 
             var secondtoken=tokens.First.Next.Value;
@@ -58,7 +61,17 @@ namespace PL.Parse {
             return ParseExpr(tokens);
         }
 
-        private Statement ParseAssignment(LinkedList<Token> tokens){
+        private Import ParseImport(LinkedList<Token> tokens){
+            tokens.RemoveFirst();
+            var secondtoken=tokens.First.Value;
+            if(secondtoken.type!=TokensType.str){
+                throw new ParserError("invalid script file name ");
+            }
+            tokens.RemoveFirst();
+            return new Import(secondtoken.Value);
+        }
+
+        private Assign ParseAssignment(LinkedList<Token> tokens){
             var id=new Id(tokens.First.Value.Value);
             tokens.RemoveFirst();
             tokens.RemoveFirst();
@@ -147,7 +160,9 @@ namespace PL.Parse {
                 case TokensType.Number:return new Number(node.Value);
                 case TokensType.str:return new Id(node.Value);
                 case TokensType.DQ:return ParseString(tokens);
-                default:throw new ParserError("expected Number token");
+                case TokensType.True:return new BLN(true);
+                case TokensType.False:return new BLN(false);
+                default:throw new ParserError("invalid type");
             }
         }
 

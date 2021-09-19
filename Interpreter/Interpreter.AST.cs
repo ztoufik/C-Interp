@@ -77,6 +77,11 @@ namespace PL.AST {
         }
     }
 
+    public class BLN:ObjNode {
+        public BLN(bool Value):base(Value) {
+        }
+    }
+
     abstract public class BinOp:Expr {
         protected readonly Expr _left;
         protected readonly Expr _right;
@@ -152,4 +157,13 @@ namespace PL.AST {
         }
     }
 
+    public class Import:Statement{
+        private readonly string _scriptfile;
+
+        public string ScriptFile{get{return this._scriptfile;} }
+
+        public Import(string scriptfile):base(){
+            this._scriptfile=scriptfile;
+        }
+    }
 }

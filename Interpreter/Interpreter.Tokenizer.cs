@@ -6,7 +6,7 @@ using PL.Error;
 namespace PL.Tokenize{
 
     public enum TokensType{
-        Number,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,str,Eof
+        Number,str,True,False,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,Get,Eof
     }
 
     public struct Token {
@@ -29,6 +29,9 @@ namespace PL.Tokenize{
 
         public Tokenizer() {
             KeyWords=new Dictionary<string,Token>();
+            KeyWords["Get"]=new Token(TokensType.Get,"Get");
+            KeyWords["True"]=new Token(TokensType.True,"True");
+            KeyWords["False"]=new Token(TokensType.False,"False");
         }
 
         private string Number(in string input,ref int pos){
@@ -108,9 +111,9 @@ namespace PL.Tokenize{
                             tokens.AddLast(new Token(TokensType.Number,Number(input,ref pos)));break;
                     case var alpha when Char.IsLetter(alpha):
                             string id=Str(input,ref pos);
-                            //if(KeyWords.ContainsKey(id)){
-                             //       }
-                            tokens.AddLast(new Token(TokensType.str,id));break;
+                            if(KeyWords.ContainsKey(id)){ tokens.AddLast(KeyWords[id]); }
+                            else{ tokens.AddLast(new Token(TokensType.str,id));}
+                            break;
                     case var space when Char.IsWhiteSpace(space):break;
                     default: throw new TokenError($"invalid token {input[pos]} at {pos}");
                 }

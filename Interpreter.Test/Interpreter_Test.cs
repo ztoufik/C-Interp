@@ -78,11 +78,22 @@ namespace PL.Test.InterpreterTest
             Assert.Equal(expected,result.ToString());
         }
 
-        [Fact]
-        public void Test_Load_File() {
-            _interpreter.Load("load");
-            var result=_interpreter.Scope["a"];
-            Assert.Equal("6",result.ToString());
+        [Theory]
+        [InlineData("{a=True;}","True","a")]
+        [InlineData("{a=False;}","False","a")]
+        public void Test_BooleanType(string input,string expected,string varname)
+        {
+            setup(input);
+            var result=_interpreter.Scope[varname];
+            Assert.Equal(expected,result.ToString());
+        }
+
+        [Theory]
+        [InlineData("{Get load;a=a*3;}","18","a")]
+        public void Test_Load_File(string stmt,string expected,string varname) {
+            setup(stmt);
+            var result=_interpreter.Scope[varname];
+            Assert.Equal(expected,result.ToString());
         }
 
         [Theory]

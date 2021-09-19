@@ -51,6 +51,9 @@ namespace PL.Test.TokenizerTest
         [InlineData(";",TokensType.Semi)]
         [InlineData("=",TokensType.Assign)]
         [InlineData("\"",TokensType.DQ)]
+        [InlineData("Get",TokensType.Get)]
+        [InlineData("True",TokensType.True)]
+        [InlineData("False",TokensType.False)]
         public void Test_TokenKeyWords_Type(string input,TokensType type) {
             setup(input);
             var result=_tokens.First.Value.type;
@@ -70,6 +73,9 @@ namespace PL.Test.TokenizerTest
         [InlineData(";")]
         [InlineData("=")]
         [InlineData("\"")]
+        [InlineData("Get")]
+        [InlineData("True")]
+        [InlineData("False")]
         public void Test_TokenKeyWords_Value(string input) {
             setup(input);
             var result=_tokens.First.Value.Value;
