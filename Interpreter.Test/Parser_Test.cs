@@ -16,6 +16,7 @@ namespace PL.Test.ParserTest
         private Expr _expr;
         private Statement _statement;
         private Compound_Statement _compound_statement;
+        private If_Clause if_clause;
 
         public Parser_Test(){
             _tokenizer=new Tokenizer();
@@ -29,6 +30,7 @@ namespace PL.Test.ParserTest
                 Where(x=>x.Name=="ParseCompoundStatement" && x.IsPrivate).First();
             this._compound_statement=(Compound_Statement)parsestmtlst.Invoke(_parser,new object[]{tokens});
         }
+
 
         private void SetupStatementParsing(string input){
             var tokens=this._tokenizer.Tokenize(input);
@@ -53,7 +55,6 @@ namespace PL.Test.ParserTest
         }
 
         [Theory]
-
         [InlineData("{a;}")]
         [InlineData("{Get test;}")]
         [InlineData("{a=True;}")]
@@ -63,6 +64,7 @@ namespace PL.Test.ParserTest
         [InlineData("{a=b;}")]
         [InlineData("{a=b;3;}")]
         [InlineData("{a=3*b;a=3;}")]
+        [InlineData("{if(True){3;};}")]
         public void Test_compoundStatement(string input)
         {
             SetupCompoundStatementParsing(input);
@@ -152,6 +154,9 @@ namespace PL.Test.ParserTest
         [InlineData("{a=;}")]
         [InlineData("{\" test;}")]
         [InlineData("{Get 11;}")]
+        [InlineData("{if True){3;};}")]
+        [InlineData("{if (True {3;};}")]
+        [InlineData("{if (True) {3;}}")]
         public void Test_ParseError(string input)
         {
             Assert.Throws<ParserError>(()=>SetupParsing(input));

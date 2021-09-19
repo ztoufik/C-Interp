@@ -52,6 +52,8 @@ namespace PL.Parse {
                     return ParseCompoundStatement(tokens);
                 case TokensType.Get:
                     return ParseImport(tokens);
+                case TokensType.If:
+                    return ParseIf_Clause(tokens);
             }
 
             var secondtoken=tokens.First.Next.Value;
@@ -59,6 +61,28 @@ namespace PL.Parse {
                 return ParseAssignment(tokens);
             }
             return ParseExpr(tokens);
+        }
+
+        private If_Clause ParseIf_Clause(LinkedList<Token> tokens){
+            tokens.RemoveFirst();
+            var token=tokens.First.Value;
+            if(token.type!=TokensType.LP){
+                throw new ParserError("missing (");
+            }
+            tokens.RemoveFirst();
+            var condition=ParseExpr(tokens);
+            token=tokens.First.Value;
+            if(token.type!=TokensType.RP){
+                throw new ParserError("missing )");
+            }
+            tokens.RemoveFirst();
+            Compound_Statement truestmt=ParseCompoundStatement(tokens),falsestmt=null;
+            token=tokens.First.Value;
+            if(token.type==TokensType.Else){
+                tokens.RemoveFirst();
+                falsestmt=ParseCompoundStatement(tokens);
+            }
+            return new If_Clause(condition,truestmt,falsestmt);
         }
 
         private Import ParseImport(LinkedList<Token> tokens){

@@ -6,7 +6,7 @@ using PL.Error;
 namespace PL.Tokenize{
 
     public enum TokensType{
-        Number,str,True,False,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,Get,Eof
+        Number,str,True,False,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,Get,If,Else,Eof
     }
 
     public struct Token {
@@ -32,6 +32,8 @@ namespace PL.Tokenize{
             KeyWords["Get"]=new Token(TokensType.Get,"Get");
             KeyWords["True"]=new Token(TokensType.True,"True");
             KeyWords["False"]=new Token(TokensType.False,"False");
+            KeyWords["if"]=new Token(TokensType.If,"if");
+            KeyWords["else"]=new Token(TokensType.Else,"else");
         }
 
         private string Number(in string input,ref int pos){

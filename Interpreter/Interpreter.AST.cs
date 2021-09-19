@@ -80,6 +80,12 @@ namespace PL.AST {
     public class BLN:ObjNode {
         public BLN(bool Value):base(Value) {
         }
+
+        public override string ToString(){
+            if((bool)(Value))
+                return "True";
+            return "False";
+        }
     }
 
     abstract public class BinOp:Expr {
@@ -164,6 +170,22 @@ namespace PL.AST {
 
         public Import(string scriptfile):base(){
             this._scriptfile=scriptfile;
+        }
+    }
+
+    public class If_Clause:Statement{
+        private readonly Expr _condition;
+        private readonly Compound_Statement _truestmt;
+        private readonly Compound_Statement _falsestmt;
+
+        public Expr Condition{get{return _condition;}}
+        public Compound_Statement TrueStmt{get{return _truestmt;}}
+        public Compound_Statement FalseStmt{get{return _falsestmt;}}
+
+        public If_Clause(Expr condition,Compound_Statement truestmt,Compound_Statement falsestmt):base(){
+            this._condition=condition;
+            this._truestmt=truestmt;
+            this._falsestmt=falsestmt;
         }
     }
 }

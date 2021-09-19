@@ -94,6 +94,15 @@ namespace PL {
                 case Assign assign:Visit_Assign(assign);break;
                 case Compound_Statement compound_statement:Visit_Compound_Statment(compound_statement);break;
                 case Import import:Visit_Import(import);break;
+                case If_Clause if_clause:
+                                   ObjNode conditioneexpr=Visit_Expr(if_clause.Condition);
+                                   if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
+                                   bool condition=((BLN)conditioneexpr).ToString()=="True";
+                                   if(condition)
+                                         {Visit_Compound_Statment(if_clause.TrueStmt);}
+                                         else
+                                         {Visit_Compound_Statment(if_clause.FalseStmt);}
+                                         break;
                 default:throw new ExecuteError("indefined statement node type");
             }
         }
