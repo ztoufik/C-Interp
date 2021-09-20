@@ -61,25 +61,40 @@ namespace PL {
                 throw new ExecuteError($"{cfilepath} can't be found in the current directory");
             }
             int linenr=0;
+            var tokenslist=new LinkedList<LinkedList<Token>>();
+            this._tokens=new LinkedList<Token>();
             foreach(string line in File.ReadLines(cfilepath)){
                 try{
-                    this.Execute(line);
+                    tokenslist.AddLast(this._tokenzier.Tokenize(line));
                 }
                 catch(TokenError e){
                     string message=e.Message;
                     throw new TokenError($"{message} line:{linenr} file:{cfilepath}");
                 }
-                catch(ParserError e){
-                    string message=e.Message;
-                    throw new ParserError($"{message} line:{linenr} file:{cfilepath}");
-                }
-                catch(ExecuteError e){
-                    string message=e.Message;
-                    throw new ExecuteError($"{message} line:{linenr} file:{cfilepath}");
-                }
                 linenr++;
             }
 
+            foreach(LinkedList<Token> tokens in tokenslist){
+                foreach(Token token in tokens){
+                    if(token.type==TokensType.Eof){
+                        continue;
+                    }
+                    this._tokens.AddLast(token);
+                }
+            }
+            this._tokens.AddLast(new Token(TokensType.Eof,null));
+            try{
+                this.Parse();
+                Visit_Compound_Statment(this._ast);
+            }
+            catch(ParserError e){
+                string message=e.Message;
+                throw new ParserError($"{message} file:{cfilepath}");
+            }
+            catch(ExecuteError e){
+                string message=e.Message;
+                throw new ExecuteError($"{message} file:{cfilepath}");
+            }
         }
 
         private void Visit_Compound_Statment(Compound_Statement compound_statment){
