@@ -109,15 +109,8 @@ namespace PL {
                 case Assign assign:Visit_Assign(assign);break;
                 case Compound_Statement compound_statement:Visit_Compound_Statment(compound_statement);break;
                 case Import import:Visit_Import(import);break;
-                case If_Clause if_clause:
-                                   ObjNode conditioneexpr=Visit_Expr(if_clause.Condition);
-                                   if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
-                                   bool condition=((BLN)conditioneexpr).ToString()=="True";
-                                   if(condition)
-                                         {Visit_Compound_Statment(if_clause.TrueStmt);}
-                                         else
-                                         {Visit_Compound_Statment(if_clause.FalseStmt);}
-                                         break;
+                case If_Clause if_clause:Visit_If_Clause(if_clause);break;
+                case Loop loop:Visit_Loop(loop);break;
                 default:throw new ExecuteError("indefined statement node type");
             }
         }
@@ -126,8 +119,30 @@ namespace PL {
             this._scope[assign.Id.VarName]=Visit_Expr(assign.expr);
         }
 
+        private void Visit_If_Clause(If_Clause if_clause){
+           ObjNode conditioneexpr=Visit_Expr(if_clause.Condition);
+           if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
+           bool condition=((BLN)conditioneexpr).ToString()=="True";
+           if(condition)
+             {Visit_Compound_Statment(if_clause.TrueStmt);}
+           else
+             {Visit_Compound_Statment(if_clause.FalseStmt);}
+        }
+
         private void Visit_Import(Import import){
             this.Load(import.ScriptFile);
+        }
+
+        private void Visit_Loop(Loop loop){
+           ObjNode conditioneexpr=Visit_Expr(loop.Condition);
+           if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
+           bool condition=((BLN)conditioneexpr).ToString()=="True";
+           while(condition){
+               Visit_Compound_Statment(loop.Body);
+               conditioneexpr=Visit_Expr(loop.Condition);
+               if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
+               condition=((BLN)conditioneexpr).ToString()=="True";
+           }
         }
 
         private ObjNode Visit_Expr(Expr expr){

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using PL.Error;
 
 namespace PL.AST {
-
     abstract public class Statement {
         public Statement(){ }
     }
@@ -186,6 +185,19 @@ namespace PL.AST {
             this._condition=condition;
             this._truestmt=truestmt;
             this._falsestmt=falsestmt;
+        }
+    }
+
+    public class Loop:Statement{
+        private readonly Expr _condition;
+        private readonly Compound_Statement _body;
+
+        public Expr Condition{get{return _condition;}}
+        public Compound_Statement Body{get{return _body;}}
+
+        public Loop(Expr condition,Compound_Statement body):base(){
+            this._condition=condition;
+            this._body=body;
         }
     }
 }

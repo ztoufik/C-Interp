@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using PL.Error;
 
 namespace PL.Tokenize{
-
     public enum TokensType{
-        Number,str,True,False,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,Get,If,Else,Eof
+        Number,str,True,False,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,Get,Loop,If,Else,Eof
     }
 
     public struct Token {
@@ -34,6 +33,7 @@ namespace PL.Tokenize{
             KeyWords["False"]=new Token(TokensType.False,"False");
             KeyWords["if"]=new Token(TokensType.If,"if");
             KeyWords["else"]=new Token(TokensType.Else,"else");
+            KeyWords["Loop"]=new Token(TokensType.Loop,"Loop");
         }
 
         private string Number(in string input,ref int pos){

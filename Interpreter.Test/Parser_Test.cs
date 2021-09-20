@@ -65,6 +65,7 @@ namespace PL.Test.ParserTest
         [InlineData("{a=b;3;}")]
         [InlineData("{a=3*b;a=3;}")]
         [InlineData("{if(True){3;};}")]
+        [InlineData("{Loop(True){3;};}")]
         public void Test_compoundStatement(string input)
         {
             SetupCompoundStatementParsing(input);

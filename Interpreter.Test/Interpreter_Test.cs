@@ -18,6 +18,10 @@ namespace PL.Test.InterpreterTest
         [Theory]
         [InlineData("{a=3;a=a+3;}",6,"a")]
         [InlineData("{b=3;a=b+3;}",6,"a")]
+        [InlineData("{a=True;if(a){b=1;}else{b=0;};}",1,"b")]
+        [InlineData("{a=False;if(a){b=1;}else{b=0;};}",0,"b")]
+        [InlineData("{a=True;b=0;Loop(a){a=False;b=1;};}",1,"b")]
+        [InlineData("{a=False;b=0;Loop(a){a=False;b=1;};}",0,"b")]
         public void Test_CompoundStatements(string input,double expected,string varname)
         {
             setup(input);
