@@ -16,7 +16,6 @@ namespace PL.Test.ParserTest
         private Expr _expr;
         private Statement _statement;
         private Compound_Statement _compound_statement;
-        private If_Clause if_clause;
 
         public Parser_Test(){
             _tokenizer=new Tokenizer();
@@ -66,6 +65,12 @@ namespace PL.Test.ParserTest
         [InlineData("{a=3*b;a=3;}")]
         [InlineData("{if(True){3;};}")]
         [InlineData("{Loop(True){3;};}")]
+        [InlineData("{3==4;}")]
+        [InlineData("{3!=4;}")]
+        [InlineData("{3>4;}")]
+        [InlineData("{3>=4;}")]
+        [InlineData("{3<=4;}")]
+        [InlineData("{3<4;}")]
         public void Test_compoundStatement(string input)
         {
             SetupCompoundStatementParsing(input);

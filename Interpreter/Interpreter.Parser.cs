@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using PL.Tokenize;
 using PL.AST;
 using PL.Error;
@@ -125,6 +126,19 @@ namespace PL.Parse {
         }
 
         private Expr ParseExpr(LinkedList<Token> tokens){
+            Expr leftnode=ParseAdd(tokens),rightnode=null;
+
+            var token=tokens.First.Value;
+
+            if(new TokensType[]{TokensType.Eq,TokensType.NEq,TokensType.GT,TokensType.GE,TokensType.LE,TokensType.LT}.Contains(token.type)){
+                tokens.RemoveFirst();
+                rightnode=ParseAdd(tokens);
+                return new CmpOp(token.type,leftnode,rightnode);
+            }
+            return leftnode;
+        }
+
+        private Expr ParseAdd(LinkedList<Token> tokens){
             Expr leftnode=ParseMul(tokens),rightnode=null;
 
             var token=tokens.First.Value;

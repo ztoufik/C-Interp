@@ -22,6 +22,12 @@ namespace PL.Test.InterpreterTest
         [InlineData("{a=False;if(a){b=1;}else{b=0;};}",0,"b")]
         [InlineData("{a=True;b=0;Loop(a){a=False;b=1;};}",1,"b")]
         [InlineData("{a=False;b=0;Loop(a){a=False;b=1;};}",0,"b")]
+        [InlineData("{if(3<4){b=1;}else{b=0;};}",1,"b")]
+        [InlineData("{if(3<=4){b=1;}else{b=0;};}",1,"b")]
+        [InlineData("{if(4>3){b=1;}else{b=0;};}",1,"b")]
+        [InlineData("{if(4>=3){b=1;}else{b=0;};}",1,"b")]
+        [InlineData("{if(4==4){b=1;}else{b=0;};}",1,"b")]
+        [InlineData("{if(4!=3){b=1;}else{b=0;};}",1,"b")]
         public void Test_CompoundStatements(string input,double expected,string varname)
         {
             setup(input);

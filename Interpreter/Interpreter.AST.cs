@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PL.Tokenize;
 using PL.Error;
 
 namespace PL.AST {
@@ -28,6 +29,14 @@ namespace PL.AST {
         public Number(string Value):base(double.Parse(Value)) {
         }
 
+        public override int GetHashCode(){
+            return this.Value.GetHashCode();
+        }
+
+        public override bool Equals(object obj){
+            return this==(Number)obj;
+        }
+
         static public Number operator +(Number own,Number other){
             var sum=(double)own.Value+(double)(other.Value);
             return new Number(sum.ToString());
@@ -50,6 +59,42 @@ namespace PL.AST {
 
             var sum=(double)own.Value/(double)(other.Value);
             return new Number(sum.ToString());
+        }
+
+        static public bool operator ==(Number own,Number other){
+            double Own=double.Parse(own.ToString());
+            double Other=double.Parse(other.ToString());
+            return Own == Other;
+        }
+
+        static public bool operator !=(Number own,Number other){
+            double Own=double.Parse(own.ToString());
+            double Other=double.Parse(other.ToString());
+            return Own != Other;
+        }
+
+        static public bool operator >=(Number own,Number other){
+            double Own=double.Parse(own.ToString());
+            double Other=double.Parse(other.ToString());
+            return Own >= Other;
+        }
+
+        static public bool operator >(Number own,Number other){
+            double Own=double.Parse(own.ToString());
+            double Other=double.Parse(other.ToString());
+            return Own > Other;
+        }
+
+        static public bool operator <=(Number own,Number other){
+            double Own=double.Parse(own.ToString());
+            double Other=double.Parse(other.ToString());
+            return Own <= Other;
+        }
+
+        static public bool operator <(Number own,Number other){
+            double Own=double.Parse(own.ToString());
+            double Other=double.Parse(other.ToString());
+            return Own < Other;
         }
     }
 
@@ -135,6 +180,18 @@ namespace PL.AST {
 
     public class MinusExpr:UnOp {
         public MinusExpr(Expr Op):base(Op) {}
+    }
+
+    // Comparaison operations
+
+    public class CmpOp:BinOp{
+        private readonly TokensType _op;
+
+        public TokensType Op{get {return this._op;}}
+
+        public CmpOp(TokensType op,Expr left, Expr right):base(left,right){
+            this._op=op;
+        }
     }
 
     // statements

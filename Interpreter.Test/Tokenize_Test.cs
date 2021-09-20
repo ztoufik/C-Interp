@@ -57,6 +57,12 @@ namespace PL.Test.TokenizerTest
         [InlineData("if",TokensType.If)]
         [InlineData("else",TokensType.Else)]
         [InlineData("Loop",TokensType.Loop)]
+        [InlineData("==",TokensType.Eq)]
+        [InlineData("!=",TokensType.NEq)]
+        [InlineData("<",TokensType.LT)]
+        [InlineData("<=",TokensType.LE)]
+        [InlineData(">",TokensType.GT)]
+        [InlineData(">=",TokensType.GE)]
         public void Test_TokenKeyWords_Type(string input,TokensType type) {
             setup(input);
             var result=_tokens.First.Value.type;
@@ -82,6 +88,12 @@ namespace PL.Test.TokenizerTest
         [InlineData("if")]
         [InlineData("else")]
         [InlineData("Loop")]
+        [InlineData("==")]
+        [InlineData("!=")]
+        [InlineData("<")]
+        [InlineData("<=")]
+        [InlineData(">")]
+        [InlineData(">=")]
         public void Test_TokenKeyWords_Value(string input) {
             setup(input);
             var result=_tokens.First.Value.Value;

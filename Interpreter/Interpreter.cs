@@ -195,6 +195,19 @@ namespace PL {
                         }
                     throw new ExecuteError("only arthmtic types can be Divided");
 
+                case CmpOp cmpop:
+                    if((left is Number)&&(right is Number)){
+                        switch(cmpop.Op){
+                            case TokensType.Eq:return new BLN((Number)left==(Number)right);
+                            case TokensType.NEq:return new BLN((Number)left!=(Number)right);
+                            case TokensType.GT:return new BLN((Number)left>(Number)right);
+                            case TokensType.GE:return new BLN((Number)left>=(Number)right);
+                            case TokensType.LT:return new BLN((Number)left<(Number)right);
+                            case TokensType.LE:return new BLN((Number)left>=(Number)right);
+                            }
+                        }
+                    throw new ExecuteError("only arthmtic types can be compared");
+
                 default: throw new ExecuteError("invalid op");
                 }
         }

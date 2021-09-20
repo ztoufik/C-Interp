@@ -5,7 +5,12 @@ using PL.Error;
 
 namespace PL.Tokenize{
     public enum TokensType{
-        Number,str,True,False,Add,Sub,Mul,Div,LP,RP,Begin,End,Semi,Assign,DQ,Get,Loop,If,Else,Eof
+        Number,str,True,False,
+        Add,Sub,Mul,Div,
+        LP,RP,Begin,End,Semi,Assign,DQ,Get,
+        Loop,If,Else,
+        Eq,NEq,GT,GE,LT,LE,
+        Eof
     }
 
     public struct Token {
@@ -101,8 +106,36 @@ namespace PL.Tokenize{
                     case '{':tokens.AddLast(new Token(TokensType.Begin,"{"));break;
                     case '}':tokens.AddLast(new Token(TokensType.End,"}"));break;
                     case ';':tokens.AddLast(new Token(TokensType.Semi,";"));break;
-                    case '=':tokens.AddLast(new Token(TokensType.Assign,"="));break;
                     case '"':tokens.AddLast(new Token(TokensType.DQ,"\""));break;
+                    case '=':if(((pos+1)<input.Length)&&(input[pos+1]=='=')) {
+                                 pos++;
+                                 tokens.AddLast(new Token(TokensType.Eq,"=="));}
+                             else{
+                                 tokens.AddLast(new Token(TokensType.Assign,"="));
+                             }
+                                 break;
+                    case '!':if(((pos+1)<input.Length)&&(input[pos+1]!='=')) {
+                                 throw new TokenError($"invalid character at positon {pos}");
+                             }
+                             else{
+                                 pos++;
+                                 tokens.AddLast(new Token(TokensType.NEq,"!="));
+                             }
+                                 break;
+                    case '>':if(((pos+1)<input.Length)&&(input[pos+1]=='=')) {
+                                 pos++;
+                                 tokens.AddLast(new Token(TokensType.GE,">="));}
+                             else{
+                                 tokens.AddLast(new Token(TokensType.GT,">"));
+                             }
+                                 break;
+                    case '<':if(((pos+1)<input.Length)&&(input[pos+1]=='=')) {
+                                 pos++;
+                                 tokens.AddLast(new Token(TokensType.LE,"<="));}
+                             else{
+                                 tokens.AddLast(new Token(TokensType.LT,"<"));
+                             }
+                                 break;
                     case '#':do{
                                  pos++;
                                  if(pos>=input.Length){
