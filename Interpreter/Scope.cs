@@ -20,7 +20,6 @@ namespace PL {
             _dict=new Dictionary<string,ObjNode>();
         }
 
-
         public IEnumerator<string> GetEnumerator(){
             return this._dict.Keys.GetEnumerator();
         }

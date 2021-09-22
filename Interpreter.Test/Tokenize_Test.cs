@@ -63,6 +63,7 @@ namespace PL.Test.TokenizerTest
         [InlineData("<=",TokensType.LE)]
         [InlineData(">",TokensType.GT)]
         [InlineData(">=",TokensType.GE)]
+        [InlineData("=&",TokensType.RefAssign)]
         public void Test_TokenKeyWords_Type(string input,TokensType type) {
             setup(input);
             var result=_tokens.First.Value.type;
@@ -94,6 +95,7 @@ namespace PL.Test.TokenizerTest
         [InlineData("<=")]
         [InlineData(">")]
         [InlineData(">=")]
+        [InlineData("=&")]
         public void Test_TokenKeyWords_Value(string input) {
             setup(input);
             var result=_tokens.First.Value.Value;

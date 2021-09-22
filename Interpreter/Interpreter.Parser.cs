@@ -63,6 +63,10 @@ namespace PL.Parse {
             if(secondtoken.type==TokensType.Assign){
                 return ParseAssignment(tokens);
             }
+
+            if(secondtoken.type==TokensType.RefAssign){
+                return ParseRefAssignement(tokens);
+            }
             return ParseExpr(tokens);
         }
 
@@ -123,6 +127,16 @@ namespace PL.Parse {
                 throw new ParserError("expected expression");
             }
             return new Assign(id,ParseExpr(tokens));
+        }
+
+        private RefAssign ParseRefAssignement(LinkedList<Token> tokens){
+            var id=new Id(tokens.First.Value.Value);
+            tokens.RemoveFirst();
+            tokens.RemoveFirst();
+            if(tokens.First.Value.type==TokensType.Eof){
+                throw new ParserError("expected expression");
+            }
+            return new RefAssign(id,ParseExpr(tokens));
         }
 
         private Expr ParseExpr(LinkedList<Token> tokens){

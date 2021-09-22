@@ -203,6 +203,18 @@ namespace PL.AST {
         }
     }
 
+    public class RefAssign:Statement {
+        private Id _id;
+        private Expr _expr;
+
+        public Id Id {get {return _id;}}
+        public Expr expr {get {return _expr;}}
+
+        public RefAssign(Id id,Expr expr):base() {
+            this._id=id;
+            this._expr=expr;
+        }
+    }
     public class Compound_Statement:Statement{
         private readonly LinkedList<Statement> _statements_list;
 

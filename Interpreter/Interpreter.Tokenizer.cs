@@ -7,7 +7,7 @@ namespace PL.Tokenize{
     public enum TokensType{
         Number,str,True,False,
         Add,Sub,Mul,Div,
-        LP,RP,Begin,End,Semi,Assign,DQ,Get,
+        LP,RP,Begin,End,Semi,Assign,RefAssign,DQ,Get,
         Loop,If,Else,
         Eq,NEq,GT,GE,LT,LE,
         Eof
@@ -110,10 +110,12 @@ namespace PL.Tokenize{
                     case '=':if(((pos+1)<input.Length)&&(input[pos+1]=='=')) {
                                  pos++;
                                  tokens.AddLast(new Token(TokensType.Eq,"=="));}
+                             else if(((pos+1)<input.Length)&&(input[pos+1]=='&')) {
+                                 pos++;
+                                 tokens.AddLast(new Token(TokensType.RefAssign,"=&")); }
                              else{
-                                 tokens.AddLast(new Token(TokensType.Assign,"="));
-                             }
-                                 break;
+                                 tokens.AddLast(new Token(TokensType.Assign,"=")); }
+                             break;
                     case '!':if(((pos+1)<input.Length)&&(input[pos+1]!='=')) {
                                  throw new TokenError($"invalid character at positon {pos}");
                              }
@@ -152,7 +154,6 @@ namespace PL.Tokenize{
                     case var space when Char.IsWhiteSpace(space):break;
                     default: throw new TokenError($"invalid token {input[pos]} at {pos}");
                 }
-
                 pos++;
             }
 

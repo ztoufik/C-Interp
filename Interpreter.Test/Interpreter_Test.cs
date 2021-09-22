@@ -38,6 +38,17 @@ namespace PL.Test.InterpreterTest
         }
 
         [Theory]
+        [InlineData("{a=True;b=0;if(a){b=&True;}else{b=&False;};}",true,"b")]
+        [InlineData("{a=False;b=0;if(a){b=&True;}else{b=&False;};}",false,"b")]
+        [InlineData("{a=True;b=False;Loop(a){a=&False;b=&1;};}",1,"b")]
+        public void Test_RefAssignement(string input,object expected,string varname)
+        {
+            setup(input);
+            var result=_interpreter.scope[varname].Value;
+            Assert.Equal(expected.ToString(),result.ToString());
+        }
+
+        [Theory]
         [InlineData("{b=4>3;}",true,"b")]
         [InlineData("{b=4>=3;}",true,"b")]
         [InlineData("{b=3<4;}",true,"b")]
@@ -114,13 +125,13 @@ namespace PL.Test.InterpreterTest
             Assert.Equal(expected,result.ToString());
         }
 
-        //[Theory]
-        //[InlineData("{Get load;a=a*3;}","18","a")]
-        //public void Test_Load_File(string stmt,string expected,string varname) {
-        //    setup(stmt);
-        //    var result=_interpreter.scope[varname];
-        //    Assert.Equal(expected,result.ToString());
-        //}
+        [Theory]
+        [InlineData("{Get load;a=a*3;}","18","a")]
+        public void Test_Load_File(string stmt,string expected,string varname) {
+            setup(stmt);
+            var result=_interpreter.scope[varname];
+            Assert.Equal(expected,result.ToString());
+        }
 
         [Theory]
         [InlineData("{3/0;}")]

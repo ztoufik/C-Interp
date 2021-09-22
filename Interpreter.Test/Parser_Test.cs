@@ -83,6 +83,7 @@ namespace PL.Test.ParserTest
         [InlineData("1+3",typeof(Expr))]
         [InlineData("A+b",typeof(Expr))]
         [InlineData("a=b",typeof(Assign))]
+        [InlineData("a=&b",typeof(RefAssign))]
         public void Test_StatementParse(string input,Type expected)
         {
             SetupStatementParsing(input);
