@@ -12,10 +12,11 @@ namespace PL.AST {
     }
 
     public abstract class ObjNode:Expr {
-        protected readonly object Value;
+        protected readonly object _value;
+        public object Value {get {return this._value;}}
 
         public ObjNode(object Value):base() {
-            this.Value=Value;
+            this._value=Value;
         }
 
         public override string ToString(){
@@ -26,7 +27,7 @@ namespace PL.AST {
     // types
 
     public class Number:ObjNode {
-        public Number(string Value):base(double.Parse(Value)) {
+        public Number(double Value):base(Value) {
         }
 
         public override int GetHashCode(){
@@ -34,22 +35,22 @@ namespace PL.AST {
         }
 
         public override bool Equals(object obj){
-            return this==(Number)obj;
+            return this.Equals(obj);
         }
 
         static public Number operator +(Number own,Number other){
             var sum=(double)own.Value+(double)(other.Value);
-            return new Number(sum.ToString());
+            return new Number(sum);
         }
 
         static public Number operator -(Number own,Number other){
             var sum=(double)own.Value+ (-(double)(other.Value));
-            return new Number(sum.ToString());
+            return new Number(sum);
         }
 
         static public Number operator *(Number own,Number other){
             var sum=(double)own.Value*(double)(other.Value);
-            return new Number(sum.ToString());
+            return new Number(sum);
         }
 
         static public Number operator /(Number own,Number other){
@@ -58,42 +59,42 @@ namespace PL.AST {
             }
 
             var sum=(double)own.Value/(double)(other.Value);
-            return new Number(sum.ToString());
+            return new Number(sum);
         }
 
         static public bool operator ==(Number own,Number other){
-            double Own=double.Parse(own.ToString());
-            double Other=double.Parse(other.ToString());
+            double Own=(double)own.Value;
+            double Other=(double)other.Value;
             return Own == Other;
         }
 
         static public bool operator !=(Number own,Number other){
-            double Own=double.Parse(own.ToString());
-            double Other=double.Parse(other.ToString());
+            double Own=(double)own.Value;
+            double Other=(double)other.Value;
             return Own != Other;
         }
 
         static public bool operator >=(Number own,Number other){
-            double Own=double.Parse(own.ToString());
-            double Other=double.Parse(other.ToString());
+            double Own=(double)own.Value;
+            double Other=(double)other.Value;
             return Own >= Other;
         }
 
         static public bool operator >(Number own,Number other){
-            double Own=double.Parse(own.ToString());
-            double Other=double.Parse(other.ToString());
+            double Own=(double)own.Value;
+            double Other=(double)other.Value;
             return Own > Other;
         }
 
         static public bool operator <=(Number own,Number other){
-            double Own=double.Parse(own.ToString());
-            double Other=double.Parse(other.ToString());
+            double Own=(double)own.Value;
+            double Other=(double)other.Value;
             return Own <= Other;
         }
 
         static public bool operator <(Number own,Number other){
-            double Own=double.Parse(own.ToString());
-            double Other=double.Parse(other.ToString());
+            double Own=(double)own.Value;
+            double Other=(double)other.Value;
             return Own < Other;
         }
     }
@@ -108,11 +109,10 @@ namespace PL.AST {
         public Id(string varname):base(varname) {
             this._varname=varname;
         }
-
     }
 
     public class Str:ObjNode {
-        public Str(string Value):base(Value.ToString()) {
+        public Str(string Value):base(Value) {
         }
 
         static public Str operator +(Str own,Str other){
@@ -123,12 +123,6 @@ namespace PL.AST {
 
     public class BLN:ObjNode {
         public BLN(bool Value):base(Value) {
-        }
-
-        public override string ToString(){
-            if((bool)(Value))
-                return "True";
-            return "False";
         }
     }
 

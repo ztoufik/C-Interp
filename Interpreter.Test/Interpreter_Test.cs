@@ -18,21 +18,37 @@ namespace PL.Test.InterpreterTest
         [Theory]
         [InlineData("{a=3;a=a+3;}",6,"a")]
         [InlineData("{b=3;a=b+3;}",6,"a")]
-        [InlineData("{a=True;if(a){b=1;}else{b=0;};}",1,"b")]
-        [InlineData("{a=False;if(a){b=1;}else{b=0;};}",0,"b")]
-        [InlineData("{a=True;b=0;Loop(a){a=False;b=1;};}",1,"b")]
-        [InlineData("{a=False;b=0;Loop(a){a=False;b=1;};}",0,"b")]
-        [InlineData("{if(3<4){b=1;}else{b=0;};}",1,"b")]
-        [InlineData("{if(3<=4){b=1;}else{b=0;};}",1,"b")]
-        [InlineData("{if(4>3){b=1;}else{b=0;};}",1,"b")]
-        [InlineData("{if(4>=3){b=1;}else{b=0;};}",1,"b")]
-        [InlineData("{if(4==4){b=1;}else{b=0;};}",1,"b")]
-        [InlineData("{if(4!=3){b=1;}else{b=0;};}",1,"b")]
         public void Test_CompoundStatements(string input,double expected,string varname)
         {
             setup(input);
-            var result=_interpreter.Scope[varname];
-            Assert.Equal(expected.ToString(),result.ToString());
+            var result=(double)_interpreter.scope[varname].Value;
+            Assert.Equal(expected,result);
+        }
+
+        [Theory]
+        [InlineData("{a=True;if(a){b=1;}else{b=0;};}",true,"a")]
+        [InlineData("{a=False;if(a){b=1;}else{b=0;};}",false,"a")]
+        [InlineData("{a=True;b=False;Loop(b){a=False;b=1;};}",true,"a")]
+        [InlineData("{a=False;b=0;Loop(a){a=False;b=1;};}",false,"a")]
+        public void Test_IfClauseAndLoop(string input,bool expected,string varname)
+        {
+            setup(input);
+            var result=(bool)_interpreter.scope[varname].Value;
+            Assert.Equal(expected,result);
+        }
+
+        [Theory]
+        [InlineData("{b=4>3;}",true,"b")]
+        [InlineData("{b=4>=3;}",true,"b")]
+        [InlineData("{b=3<4;}",true,"b")]
+        [InlineData("{b=3<=4;}",true,"b")]
+        [InlineData("{b=4==3;}",false,"b")]
+        [InlineData("{b=4!=3;}",true,"b")]
+        public void Test_LogicalOP(string input,bool expected,string varname)
+        {
+            setup(input);
+            var result=(bool)_interpreter.scope[varname].Value;
+            Assert.Equal(expected,result);
         }
 
         [Theory]
@@ -74,7 +90,7 @@ namespace PL.Test.InterpreterTest
         public void Test_Arthm_Assignement_Expression(string input,double expected,string varname)
         {
             setup(input);
-            var result=_interpreter.Scope[varname];
+            var result=_interpreter.scope[varname];
             Assert.Equal(expected.ToString(),result.ToString());
         }
 
@@ -84,7 +100,7 @@ namespace PL.Test.InterpreterTest
         public void Test_Str_Assignement_Expression(string input,string expected,string varname)
         {
             setup(input);
-            var result=_interpreter.Scope[varname];
+            var result=_interpreter.scope[varname];
             Assert.Equal(expected,result.ToString());
         }
 
@@ -94,17 +110,17 @@ namespace PL.Test.InterpreterTest
         public void Test_BooleanType(string input,string expected,string varname)
         {
             setup(input);
-            var result=_interpreter.Scope[varname];
+            var result=_interpreter.scope[varname];
             Assert.Equal(expected,result.ToString());
         }
 
-        [Theory]
-        [InlineData("{Get load;a=a*3;}","18","a")]
-        public void Test_Load_File(string stmt,string expected,string varname) {
-            setup(stmt);
-            var result=_interpreter.Scope[varname];
-            Assert.Equal(expected,result.ToString());
-        }
+        //[Theory]
+        //[InlineData("{Get load;a=a*3;}","18","a")]
+        //public void Test_Load_File(string stmt,string expected,string varname) {
+        //    setup(stmt);
+        //    var result=_interpreter.scope[varname];
+        //    Assert.Equal(expected,result.ToString());
+        //}
 
         [Theory]
         [InlineData("{3/0;}")]

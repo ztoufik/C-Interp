@@ -214,7 +214,7 @@ namespace PL.Parse {
             var node=tokens.First.Value;
             tokens.RemoveFirst();
             switch(node.type){
-                case TokensType.Number:return new Number(node.Value);
+                case TokensType.Number:return new Number(double.Parse(node.Value));
                 case TokensType.str:return new Id(node.Value);
                 case TokensType.DQ:return ParseString(tokens);
                 case TokensType.True:return new BLN(true);

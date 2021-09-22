@@ -13,7 +13,7 @@ namespace PL {
         private LinkedList<Token> _tokens;
         private Compound_Statement _ast;
         private string _input;
-        private IDictionary<string,ObjNode> _scope;
+        private Scope _currentscope;
 
         public string Input{
             get {return _input;}
@@ -30,13 +30,14 @@ namespace PL {
             //set {_ast =value;}
         }
 
-        public IDictionary<string,ObjNode> Scope{
-            get {return _scope;}
+        public Scope scope{
+            get {return this._currentscope;}
         }
+
         public Interpreter(){
             this._tokenzier=new Tokenizer();
             this._parser=new Parser();
-            this._scope=new Dictionary<string,ObjNode>();
+            this._currentscope=null;
         }
 
         public void Tokenize(){
@@ -98,8 +99,13 @@ namespace PL {
         }
 
         private void Visit_Compound_Statment(Compound_Statement compound_statment){
+            Scope localscope=new Scope(this._currentscope);
+            this._currentscope=localscope;
             foreach(var stmt in compound_statment.statement_list){
                 Visit_Statment(stmt);
+            }
+            if(!(this._currentscope.Parent is null)){
+                this._currentscope=this._currentscope.Parent;
             }
         }
 
@@ -116,13 +122,13 @@ namespace PL {
         }
 
         private void Visit_Assign(Assign assign){
-            this._scope[assign.Id.VarName]=Visit_Expr(assign.expr);
+            this._currentscope[assign.Id.VarName]=Visit_Expr(assign.expr);
         }
 
         private void Visit_If_Clause(If_Clause if_clause){
            ObjNode conditioneexpr=Visit_Expr(if_clause.Condition);
            if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
-           bool condition=((BLN)conditioneexpr).ToString()=="True";
+           bool condition=(bool)conditioneexpr.Value;
            if(condition)
              {Visit_Compound_Statment(if_clause.TrueStmt);}
            else
@@ -136,12 +142,12 @@ namespace PL {
         private void Visit_Loop(Loop loop){
            ObjNode conditioneexpr=Visit_Expr(loop.Condition);
            if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
-           bool condition=((BLN)conditioneexpr).ToString()=="True";
+           bool condition=(bool)conditioneexpr.Value;
            while(condition){
                Visit_Compound_Statment(loop.Body);
                conditioneexpr=Visit_Expr(loop.Condition);
                if(!(conditioneexpr is BLN)){ throw new ExecuteError("expected BLN value");}
-               condition=((BLN)conditioneexpr).ToString()=="True";
+               condition=(bool)conditioneexpr.Value;
            }
         }
 
@@ -197,13 +203,15 @@ namespace PL {
 
                 case CmpOp cmpop:
                     if((left is Number)&&(right is Number)){
+                        Number Nleft=(Number)left;
+                        Number Nright=(Number)right;
                         switch(cmpop.Op){
-                            case TokensType.Eq:return new BLN((Number)left==(Number)right);
-                            case TokensType.NEq:return new BLN((Number)left!=(Number)right);
-                            case TokensType.GT:return new BLN((Number)left>(Number)right);
-                            case TokensType.GE:return new BLN((Number)left>=(Number)right);
-                            case TokensType.LT:return new BLN((Number)left<(Number)right);
-                            case TokensType.LE:return new BLN((Number)left>=(Number)right);
+                            case TokensType.Eq:return new BLN(Nleft==Nright);
+                            case TokensType.NEq:return new BLN(Nleft!=Nright);
+                            case TokensType.GT:return new BLN(Nleft > Nright);
+                            case TokensType.GE:return new BLN(Nleft>=Nright);
+                            case TokensType.LT:return new BLN(Nleft<Nright);
+                            case TokensType.LE:return new BLN(Nleft<=Nright);
                             }
                         }
                     throw new ExecuteError("only arthmtic types can be compared");
@@ -223,17 +231,26 @@ namespace PL {
 
                 case MinusExpr minusexpr:
                     if(op is Number){
-                        return new Number("-1")*(Number)op;
+                        return new Number(-1)*(Number)op;
                     }
                     throw new ExecuteError("expected Number operand");
                 default: throw new ExecuteError("invalid op");
             }
         }
+
         private ObjNode Visit_Id(Id id){
-            if(!this._scope.Keys.Contains(id.VarName)){
+            ObjNode Value=this.LookUp(id.VarName,this._currentscope);
+            if(Value is null){
                 throw new ExecuteError("indefined identifier");
             }
-            return this._scope[id.VarName];
+            return Value;
+        }
+
+        private ObjNode LookUp(string key,Scope scope){
+            if(scope is null){
+                return null;
+            }
+            return scope[key]??LookUp(key,scope.Parent);
         }
    }
 }
