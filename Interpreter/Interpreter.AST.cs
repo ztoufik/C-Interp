@@ -126,6 +126,24 @@ namespace PL.AST {
         }
     }
 
+    public class Null:ObjNode {
+        public Null():base(null) {
+        }
+    }
+
+    public class Function:ObjNode {
+        private readonly LinkedList<Id> _ids;
+        private readonly Compound_Statement _body;
+
+        public LinkedList<Id> Ids{get {return this._ids;}}
+        public Compound_Statement Body {get {return this._body;}}
+
+        public Function(LinkedList<Id> Ids,Compound_Statement body):base(null) {
+            this._ids=Ids;
+            this._body=body;
+        }
+    }
+
     abstract public class BinOp:Expr {
         protected readonly Expr _left;
         protected readonly Expr _right;
@@ -147,6 +165,19 @@ namespace PL.AST {
 
         public UnOp(Expr Op):base() {
             this._Op=Op;
+        }
+    }
+
+    public class Call:Expr{
+        private readonly LinkedList<Expr> _exprs;
+        private readonly Id _id;
+
+        public LinkedList<Expr> exprs { get {return this._exprs;}}
+        public Id id { get {return this._id;}}
+
+        public Call(Id id,LinkedList<Expr> Exprs){
+            this._id=id;
+            this._exprs=Exprs;
         }
     }
 

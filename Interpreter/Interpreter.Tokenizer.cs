@@ -5,9 +5,9 @@ using PL.Error;
 
 namespace PL.Tokenize{
     public enum TokensType{
-        Number,str,True,False,
+        Number,str,True,False,Fn,
         Add,Sub,Mul,Div,
-        LP,RP,Begin,End,Semi,Assign,RefAssign,DQ,Get,
+        LP,RP,Begin,End,Semi,Assign,RefAssign,DQ,Get,Colon,
         Loop,If,Else,
         Eq,NEq,GT,GE,LT,LE,
         Eof
@@ -39,6 +39,7 @@ namespace PL.Tokenize{
             KeyWords["if"]=new Token(TokensType.If,"if");
             KeyWords["else"]=new Token(TokensType.Else,"else");
             KeyWords["Loop"]=new Token(TokensType.Loop,"Loop");
+            KeyWords["Function"]=new Token(TokensType.Fn,"Function");
         }
 
         private string Number(in string input,ref int pos){
@@ -107,6 +108,7 @@ namespace PL.Tokenize{
                     case '}':tokens.AddLast(new Token(TokensType.End,"}"));break;
                     case ';':tokens.AddLast(new Token(TokensType.Semi,";"));break;
                     case '"':tokens.AddLast(new Token(TokensType.DQ,"\""));break;
+                    case ',':tokens.AddLast(new Token(TokensType.Colon,","));break;
                     case '=':if(((pos+1)<input.Length)&&(input[pos+1]=='=')) {
                                  pos++;
                                  tokens.AddLast(new Token(TokensType.Eq,"=="));}

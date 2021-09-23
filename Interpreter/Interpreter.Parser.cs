@@ -130,7 +130,7 @@ namespace PL.Parse {
         }
 
         private RefAssign ParseRefAssignement(LinkedList<Token> tokens){
-            var id=new Id(tokens.First.Value.Value);
+            var id  =new Id(tokens.First.Value.Value);
             tokens.RemoveFirst();
             tokens.RemoveFirst();
             if(tokens.First.Value.type==TokensType.Eof){
@@ -166,7 +166,7 @@ namespace PL.Parse {
                 else {
                     leftnode= new SubExpr(leftnode,rightnode);
                 }
-               token=tokens.First.Value;
+                token=tokens.First.Value;
             }
             return leftnode;
         }
@@ -180,10 +180,10 @@ namespace PL.Parse {
                 tokens.RemoveFirst();
                 rightnode=ParseUnOpr(tokens);
                 if(token.type==TokensType.Mul){
-                        leftnode= new MulExpr(leftnode,rightnode);
+                    leftnode= new MulExpr(leftnode,rightnode);
                 }
                 else {
-                        leftnode= new DivExpr(leftnode,rightnode);
+                    leftnode= new DivExpr(leftnode,rightnode);
                 }
                 token=tokens.First.Value;
             }
@@ -220,7 +220,7 @@ namespace PL.Parse {
             return ParseTerm(tokens);
         }
 
-        private ObjNode ParseTerm(LinkedList<Token> tokens){
+        private Expr ParseTerm(LinkedList<Token> tokens){
             if (tokens.Count==0){
                 throw new ParserError("empty tokens stream");
             }
@@ -229,12 +229,66 @@ namespace PL.Parse {
             tokens.RemoveFirst();
             switch(node.type){
                 case TokensType.Number:return new Number(double.Parse(node.Value));
-                case TokensType.str:return new Id(node.Value);
+                case TokensType.str:{ var id =new Id(node.Value);
+                                        if(tokens.First.Value.type==TokensType.LP){
+                                            tokens.RemoveFirst();
+                                            return new Call(id,ParseCallExpr(tokens));
+                                        }
+                                        return id; }
                 case TokensType.DQ:return ParseString(tokens);
                 case TokensType.True:return new BLN(true);
                 case TokensType.False:return new BLN(false);
+                case TokensType.Fn:return ParseFunction(tokens);
                 default:throw new ParserError("invalid type");
             }
+        }
+
+        private Function ParseFunction(LinkedList<Token> tokens){
+            var token= tokens.First.Value;
+            if(token.type!=TokensType.LP){
+                throw new ParserError("missing (");
+            }
+            tokens.RemoveFirst();
+            var ids=new LinkedList<Id>();
+            do{
+                token= tokens.First.Value;
+                if(token.type!=TokensType.str){
+                    throw new ParserError("Identifier expected");
+                }
+                ids.AddLast(new Id(token.Value));
+                tokens.RemoveFirst();
+
+                if(tokens.Count<=0){
+                    throw new ParserError("missing )");
+                }
+
+                token= tokens.First.Value;
+            }while(token.type==TokensType.Colon);
+
+            if(token.type!=TokensType.RP){
+                throw new ParserError("missing )");
+            }
+            tokens.RemoveFirst();
+
+            return new Function(ids,ParseCompoundStatement(tokens));
+        }
+
+        private LinkedList<Expr> ParseCallExpr(LinkedList<Token> tokens){
+            LinkedList<Expr> exprslist=new LinkedList<Expr>();
+            if(tokens.First.Value.type!=TokensType.RP){
+                exprslist.AddLast(ParseExpr(tokens));
+
+                if(tokens.First.Value.type==TokensType.Colon){
+                    tokens.RemoveFirst();
+                    foreach(var expr in ParseCallExpr(tokens)){
+                        exprslist.AddLast(expr);
+                    }
+                }
+
+            }
+            tokens.RemoveFirst();
+
+            return exprslist;
         }
 
         private Str ParseString(LinkedList<Token> tokens){
@@ -251,6 +305,5 @@ namespace PL.Parse {
             tokens.RemoveFirst();
             return new Str(str.ToString());
         }
-
     }
 }

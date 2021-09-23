@@ -82,6 +82,9 @@ namespace PL.Test.ParserTest
         [InlineData("3",typeof(Expr))]
         [InlineData("1+3",typeof(Expr))]
         [InlineData("A+b",typeof(Expr))]
+        [InlineData("a()",typeof(Call))]
+        [InlineData("a(a)",typeof(Call))]
+        [InlineData("a(a,b)",typeof(Call))]
         [InlineData("a=b",typeof(Assign))]
         [InlineData("a=&b",typeof(RefAssign))]
         public void Test_StatementParse(string input,Type expected)
@@ -133,6 +136,7 @@ namespace PL.Test.ParserTest
         [InlineData("\"test\"",typeof(Str))]
         [InlineData("True",typeof(BLN))]
         [InlineData("False",typeof(BLN))]
+        [InlineData("Function (aaa){a3;}",typeof(Function))]
         public void Test_ObjNodeType(string input,Type expected)
         {
             SetupExprParsing(input);
@@ -146,6 +150,7 @@ namespace PL.Test.ParserTest
         [InlineData("\" test\"",typeof(ObjNode))]
         [InlineData("True",typeof(ObjNode))]
         [InlineData("False",typeof(ObjNode))]
+        [InlineData("Function (aaa){a3;}",typeof(ObjNode))]
         public void Test_ObjNode(string input,Type expected)
         {
             SetupExprParsing(input);
