@@ -7,6 +7,15 @@ namespace PL.AST {
         public Statement(){ }
     }
 
+    public class Program {
+        private IEnumerable<Statement> _stmtslist;
+        public IEnumerable<Statement> StmtList{get {return this._stmtslist;}}
+
+        public Program(IEnumerable<Statement> statements){
+            this._stmtslist=statements;
+        }
+    }
+
     abstract public class Expr:Statement {
         public Expr():base(){}
     }
@@ -99,17 +108,6 @@ namespace PL.AST {
         }
     }
 
-    public class Id:ObjNode {
-        private string _varname;
-
-        public string VarName{
-            get { return _varname;}
-        }
-
-        public Id(string varname):base(varname) {
-            this._varname=varname;
-        }
-    }
 
     public class Str:ObjNode {
         public Str(string Value):base(Value) {
@@ -219,6 +217,18 @@ namespace PL.AST {
         }
     }
 
+    public class Id:Expr {
+        private string _varname;
+
+        public string VarName{
+            get { return _varname;}
+        }
+
+        public Id(string varname):base() {
+            this._varname=varname;
+        }
+    }
+
     // statements
 
     public class Assign:Statement {
@@ -256,17 +266,20 @@ namespace PL.AST {
         }
     }
 
-    public class Import:Statement{
+    public class Get:Statement{
         private readonly string _scriptfile;
+        private readonly Program _program;
 
         public string ScriptFile{get{return this._scriptfile;} }
+        public Program program{get{return this._program;} }
 
-        public Import(string scriptfile):base(){
+        public Get(string scriptfile,Program program):base(){
             this._scriptfile=scriptfile;
+            this._program=program;
         }
     }
 
-    public class If_Clause:Statement{
+    public class IfClause:Statement{
         private readonly Expr _condition;
         private readonly Compound_Statement _truestmt;
         private readonly Compound_Statement _falsestmt;
@@ -275,7 +288,7 @@ namespace PL.AST {
         public Compound_Statement TrueStmt{get{return _truestmt;}}
         public Compound_Statement FalseStmt{get{return _falsestmt;}}
 
-        public If_Clause(Expr condition,Compound_Statement truestmt,Compound_Statement falsestmt):base(){
+        public IfClause(Expr condition,Compound_Statement truestmt,Compound_Statement falsestmt):base(){
             this._condition=condition;
             this._truestmt=truestmt;
             this._falsestmt=falsestmt;
