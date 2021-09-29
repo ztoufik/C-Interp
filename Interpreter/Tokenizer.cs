@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using PL.Error;
 
 namespace PL.Tokenize{
-
     static public class Tokenizer {
         static private OrderedDictionary map=new OrderedDictionary();
         private const uint CHARS_NUMBER=21;
@@ -39,26 +38,26 @@ namespace PL.Tokenize{
                 }
             }
             tokenslist.AddLast(new Token(TokensType.Eof,null));
-            
+
             return new TokenStream(tokenslist);
         }
-            
 
-         static public  TokenStream TokenizeString(string input){
-             var tokens=GenerateTokens(input);
-             tokens.AddLast(new Token(TokensType.Eof,null));
-             return new TokenStream(tokens);
+
+        static public  TokenStream TokenizeString(string input){
+            var tokens=GenerateTokens(input);
+            tokens.AddLast(new Token(TokensType.Eof,null));
+            return new TokenStream(tokens);
         }
 
-         static private  LinkedList<Token> GenerateTokens(string input){
-             var tokens=new LinkedList<Token>();
+        static private  LinkedList<Token> GenerateTokens(string input){
+            var tokens=new LinkedList<Token>();
             foreach(var tokenstring in LexicalGroup(input.AsSpan())){
                 tokens.AddLast(Tokenize(tokenstring));
             }
             return tokens;
         }
 
-         static private IEnumerable<string> LexicalGroup(ReadOnlySpan<char> subject){
+        static private IEnumerable<string> LexicalGroup(ReadOnlySpan<char> subject){
             var lexicalgroup=new LinkedList<string>();
             var ignorepattern=new Regex(@"(^#.*#)|(^\s+)");
             string pattern=StringifyKeys();
@@ -85,16 +84,17 @@ namespace PL.Tokenize{
                 subject=subject.Slice(Value.Length);
             }
             return lexicalgroup;
-         }
+        }
 
-         static private  Token Tokenize(string tokenstring){
+        static private  Token Tokenize(string tokenstring){
             var pattern=Match(tokenstring);
             return new Token((TokensType)map[pattern],tokenstring);
         }
 
-         static private void TokensInit(){
+        static private void TokensInit(){
             map[@"(^\d+(\.\d+)?)"]=TokensType.Number;
             map[@"(^\w[\w\d]*)"]=TokensType.str;
+            map["(^\".*?\")"]=TokensType.Qstr;
             map[@"(^=&)"]=TokensType.RefAssign;
             map[@"(^==)"]=TokensType.Eq;
             map[@"(^!=)"]=TokensType.NEq;
@@ -110,13 +110,12 @@ namespace PL.Tokenize{
             map[@"(^\})"]=TokensType.End;
             map[@"(^;)"]=TokensType.Semi;
             map[@"(^=)"]=TokensType.Assign;
-            map["(^\")"]=TokensType.DQ;
             map[@"(^,)"]=TokensType.Colon;
             map[@"(^\>)"]=TokensType.GT;
             map[@"(^\<)"]=TokensType.LT;
         }
 
-         static private void KeyWordsInit(){
+        static private void KeyWordsInit(){
             map[@"(^Function)"]=TokensType.Fn;
             map[@"(^True)"]=TokensType.True;
             map[@"(^False)"]=TokensType.False;
@@ -124,9 +123,10 @@ namespace PL.Tokenize{
             map[@"(^If)"]=TokensType.If;
             map[@"(^Else)"]=TokensType.Else;
             map[@"(^Get)"]=TokensType.Get;
+            map[@"(^Return)"]=TokensType.Ret;
         }
 
-         static private string Match(string input){
+        static private string Match(string input){
             Regex regex;
             foreach(var key in map.Keys){
                 regex=new Regex(key.ToString());
@@ -135,7 +135,7 @@ namespace PL.Tokenize{
             return null;
         }
 
-         static private string StringifyKeys(){
+        static private string StringifyKeys(){
             var keys=new LinkedList<string>();
             foreach(var key in map.Keys){
                 keys.AddLast(key.ToString());

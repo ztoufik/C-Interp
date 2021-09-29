@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Linq;
 using PL.Tokenize;
@@ -35,6 +34,7 @@ namespace PL.Parse {
                     return ParseIf_Clause(tokenstream);
                 case TokensType.Loop:
                     return ParseLoop(tokenstream);
+                case TokensType.Ret: {tokenstream.Advance(); return new Return(ParseExpr(tokenstream));}
             }
 
             token=tokenstream.Next.Value;
@@ -232,7 +232,7 @@ namespace PL.Parse {
                 case TokensType.True:expr= new BLN(true);break;
                 case TokensType.False:expr= new BLN(false);break;
                 case TokensType.str:expr= new Id(token.Value);break;
-                case TokensType.DQ:expr= ParseString(tokenstream);break;
+                case TokensType.Qstr:expr= new Str(token.Value);break;
                 case TokensType.Fn:expr= ParseFunction(tokenstream);break;
                 default:throw new ParserError("invalid type");
             }
@@ -288,19 +288,6 @@ namespace PL.Parse {
             tokenstream.Advance();
 
             return exprslist;
-        }
-
-        static private Str ParseString(TokenStream tokenstream){
-            var str=new StringBuilder();
-            while(tokenstream.Current.Value.type!=TokensType.DQ){
-                str.Append(tokenstream.Current.Value.Value);
-                tokenstream.Advance();
-                if(tokenstream.Count<=0){
-                    throw new ParserError(" missing \"");
-                }
-            }
-            tokenstream.Advance();
-            return new Str(str.ToString());
         }
 
         static private LinkedList<Expr> ParseArgsList(TokenStream tokenstream){

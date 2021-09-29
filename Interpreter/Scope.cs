@@ -24,4 +24,14 @@ namespace PL {
             return this._dict.Keys.GetEnumerator();
         }
     }
+
+    public class FuncScope:Scope{
+        private ObjNode _return;
+
+        public ObjNode Return {get {return this._return;} set {this._return=value;}}
+
+        public FuncScope(Scope parent):base(parent){
+            this._return=new Null();
+        }
+    }
 }

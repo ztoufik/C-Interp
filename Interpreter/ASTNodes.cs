@@ -113,7 +113,9 @@ namespace PL.AST {
         }
 
         static public Str operator +(Str own,Str other){
-            var concat=own.Value.ToString()+other.Value.ToString();
+            var firststring=own.Value as string;
+            var secondstring=other.Value as string;
+            var concat='"'+firststring.Trim('"')+secondstring.Trim('"')+'"';
             return new Str(concat);
         }
     }
@@ -304,6 +306,16 @@ namespace PL.AST {
         public Loop(Expr condition,Compound_Statement body):base(){
             this._condition=condition;
             this._body=body;
+        }
+    }
+
+    public class Return:Statement {
+        private Expr _expr;
+
+        public Expr expr {get {return _expr;}}
+
+        public Return(Expr expr):base() {
+            this._expr=expr;
         }
     }
 }

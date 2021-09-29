@@ -57,8 +57,9 @@ namespace PL.Test.InterpreterTest {
         }
 
         [Theory]
-        [InlineData("a=\"test\";","test","a")]
-        [InlineData("a=\"1\"+\"2\";","12","a")]
+        [InlineData("a=\"test\";","\"test\"","a")]
+        [InlineData("a=\"test \";","\"test \"","a")]
+        [InlineData("a=\"1\"+\"2\";","\"12\"","a")]
         public void Test_Str_Expression(string input,string expected,string varname)
         {
             var result=setup(input,varname);
@@ -127,6 +128,8 @@ namespace PL.Test.InterpreterTest {
         [InlineData("a=3;Function(){a=&4;}();",4,"a")]
         [InlineData("a=3;Function(b){a=&b;}(4);",4,"a")]
         [InlineData("a=3;b=Function(b,c){a=&b+c;};b(4,1+3);",8,"a")]
+        [InlineData("b=Function(b,c){Return b+c;};a=b(4,1+3);",8,"a")]
+        [InlineData("b=Function(b,c){Return b+c;};a=b(\" function\",\" call \");","\" function call \"" ,"a")]
         public void Test_FunctionCall(string input,object expected,string varname)
         {
             var result=setup(input,varname);

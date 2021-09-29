@@ -9,7 +9,6 @@ using PL.Tokenize;
 namespace PL.Test.ParserTest
 {
     public class Parser_Test {
-
         private Program SetupParsing(string input){
             return Parser.Parse(Tokenizer.TokenizeString(input));
         }
@@ -141,6 +140,15 @@ namespace PL.Test.ParserTest
         }
 
         [Theory]
+        [InlineData("Return 3;")]
+        [InlineData("Return a;")]
+        public void Test_Return(string input) {
+                var programast=SetupParsing(input);
+                var node=programast.StmtList.First();
+                Assert.IsType<Return>(node);
+        }
+
+        [Theory]
         [InlineData("a=&3;")]
         [InlineData("a=&b;")]
         public void Test_RefAssignement(string input) {
@@ -159,7 +167,6 @@ namespace PL.Test.ParserTest
 
         [Theory]
         [InlineData("0test;")]
-        [InlineData("\" test;")]
         [InlineData("(1;")]
         [InlineData("1);")]
         [InlineData("+;")]
@@ -185,6 +192,7 @@ namespace PL.Test.ParserTest
         [InlineData("a);")]
         [InlineData("b(,a)(c,d);")]
         [InlineData("Function (){a3;}(a,);")]
+        [InlineData("Return ;")]
         public void Test_ParseError(string input)
         {
             Assert.Throws<ParserError>(()=>SetupParsing(input));

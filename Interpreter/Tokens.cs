@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace PL.Tokenize{
     public enum TokensType{
-        Number,str,True,False,Fn,
+        Number,str,Qstr,True,False,Fn,
         Add,Sub,Mul,Div,
-        LP,RP,Begin,End,Semi,Assign,RefAssign,DQ,Get,Colon,
-        Loop,If,Else,
+        LP,RP,Begin,End,Semi,Assign,RefAssign,Get,Colon,
+        Loop,If,Else,Ret,
         Eq,NEq,GT,GE,LT,LE,
         Eof
     }

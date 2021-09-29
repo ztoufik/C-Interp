@@ -46,6 +46,7 @@ namespace PL {
                 case Get Get:VisitGet(Get);break;
                 case IfClause ifclause:VisitIfClause(ifclause);break;
                 case Loop loop:VisitLoop(loop);break;
+                case Return ret:VisitReturn(ret);break;
                 default:throw new ExecuteError("indefined statement node type");
             }
         }
@@ -84,6 +85,14 @@ namespace PL {
             VisitProgram(get.program);
         }
 
+        private void VisitReturn(Return ret){
+            var funcscope=this._currentscope as FuncScope;
+            if(funcscope is null){
+                throw new ExecuteError("no function stack");
+            }
+            funcscope.Return=VisitExpr(ret.expr);
+        }
+         
         private void VisitLoop(Loop loop){
             Scope localscope=new Scope(this._currentscope);
             this._currentscope=localscope;
@@ -205,7 +214,7 @@ namespace PL {
         }
 
         private ObjNode VisitCall(Call call){
-            Scope localscope=new Scope(this._currentscope);
+            FuncScope localscope=new FuncScope(this._currentscope);
             this._currentscope=localscope;
             var func=VisitExpr(call.Caller);
             if(func.GetType()!=typeof(Function)){
@@ -218,8 +227,9 @@ namespace PL {
             }
             var cmpstmt=((Function)func).Body;
             VisitCompoundStatment(cmpstmt);
+            var ret=localscope.Return;
             this._currentscope=this._currentscope.Parent; 
-            return new Null();
+            return ret;
         }
     }
 }
