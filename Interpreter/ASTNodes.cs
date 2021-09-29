@@ -108,7 +108,6 @@ namespace PL.AST {
         }
     }
 
-
     public class Str:ObjNode {
         public Str(string Value):base(Value) {
         }

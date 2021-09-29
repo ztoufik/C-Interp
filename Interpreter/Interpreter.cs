@@ -1,4 +1,4 @@
-using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using PL.Tokenize;
 using PL.AST;
@@ -6,7 +6,6 @@ using PL.Parse;
 using PL.Error;
 
 namespace PL {
-
     public class Interpreter{
         private Scope _currentscope;
 
@@ -105,14 +104,17 @@ namespace PL {
                 case Id id:
                     return VisitId(id);
 
-                case ObjNode objnode:
-                    return objnode;
-
                 case BinOp binop:
                     return VisitBinOp(binop);
 
+                case Call call:
+                    return VisitCall(call);
+
                 case UnOp unop:
                     return VisitUnOp(unop);
+
+                case ObjNode objnode:
+                    return objnode;
 
                 default: throw new ExecuteError("indefined AST Node");
             }
@@ -124,30 +126,30 @@ namespace PL {
             switch(binop){
                 case AddExpr addexpr:
                     if((left is Number)&&(right is Number)){
-                            return (Number)left+(Number)right;
-                        }
+                        return (Number)left+(Number)right;
+                    }
 
                     if((left is Str)&&(right is Str)){
-                            return (Str)left+(Str)right;
-                        }
+                        return (Str)left+(Str)right;
+                    }
                     throw new ExecuteError("type mismatch");
 
                 case SubExpr subexpr:
                     if((left is Number)&&(right is Number)){
-                            return (Number)left-(Number)right;
-                        }
+                        return (Number)left-(Number)right;
+                    }
                     throw new ExecuteError("only arthmtic types can be substracted");
-                     
+
                 case MulExpr mulexpr:
                     if((left is Number)&&(right is Number)){
-                            return (Number)left*(Number)right;
-                        }
+                        return (Number)left*(Number)right;
+                    }
                     throw new ExecuteError("only arthmtic types can be Multiplied");
 
                 case DivExpr divexpr:
                     if((left is Number)&&(right is Number)){
-                            return (Number)left/(Number)right;
-                        }
+                        return (Number)left/(Number)right;
+                    }
                     throw new ExecuteError("only arthmtic types can be Divided");
 
                 case CmpOp cmpop:
@@ -161,12 +163,12 @@ namespace PL {
                             case TokensType.GE:return new BLN(Nleft>=Nright);
                             case TokensType.LT:return new BLN(Nleft<Nright);
                             case TokensType.LE:return new BLN(Nleft<=Nright);
-                            }
                         }
+                    }
                     throw new ExecuteError("only arthmtic types can be compared");
 
                 default: throw new ExecuteError("invalid op");
-                }
+            }
         }
 
         private ObjNode VisitUnOp(UnOp unop){
@@ -201,5 +203,23 @@ namespace PL {
             }
             return scope[key]??LookUp(key,scope.Parent);
         }
-   }
+
+        private ObjNode VisitCall(Call call){
+            Scope localscope=new Scope(this._currentscope);
+            this._currentscope=localscope;
+            var func=VisitExpr(call.Caller);
+            if(func.GetType()!=typeof(Function)){
+                throw new ExecuteError("function expression expected");
+            }
+            var zippedlist=((Function)func).Args.Zip<Id,Expr,KeyValuePair<string,ObjNode>>(
+                    call.ArgsExprs,(id,expr)=>new KeyValuePair<string,ObjNode>(id.VarName,VisitExpr(expr)));
+            foreach(var arg in zippedlist){
+                this._currentscope[arg.Key]=arg.Value;
+            }
+            var cmpstmt=((Function)func).Body;
+            VisitCompoundStatment(cmpstmt);
+            this._currentscope=this._currentscope.Parent; 
+            return new Null();
+        }
+    }
 }

@@ -3,7 +3,6 @@ using PL.Error;
 
 namespace PL.Test.InterpreterTest {
     public class InterpreterTest {
-
         private readonly Interpreter _interpreter;
 
         public InterpreterTest(){
@@ -125,6 +124,16 @@ namespace PL.Test.InterpreterTest {
         }
 
         [Theory]
+        [InlineData("a=3;Function(){a=&4;}();",4,"a")]
+        [InlineData("a=3;Function(b){a=&b;}(4);",4,"a")]
+        [InlineData("a=3;b=Function(b,c){a=&b+c;};b(4,1+3);",8,"a")]
+        public void Test_FunctionCall(string input,object expected,string varname)
+        {
+            var result=setup(input,varname);
+            Assert.Equal(expected.ToString(),result.ToString());
+        }
+
+        [Theory]
         [InlineData("3/0;")]
         [InlineData("0/0;")]
         public void Test_DivideByZero(string input)
@@ -134,6 +143,7 @@ namespace PL.Test.InterpreterTest {
 
         [Theory]
         [InlineData("a=\"test\";a+1;")]
+        [InlineData("b=Function(b,c){a=&b+c;};b(4,1+3);")]
         public void Test_ExecuteError(string input)
         {
             Assert.Throws<ExecuteError>(()=>_interpreter.ExecuteStatement(input));
