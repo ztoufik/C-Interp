@@ -166,8 +166,8 @@ namespace PL {
                         Number Nleft=(Number)left;
                         Number Nright=(Number)right;
                         switch(cmpop.Op){
-                            case TokensType.Eq:return new BLN(Nleft==Nright);
-                            case TokensType.NEq:return new BLN(Nleft!=Nright);
+                            case TokensType.EQ:return new BLN(Nleft==Nright);
+                            case TokensType.Neq:return new BLN(Nleft!=Nright);
                             case TokensType.GT:return new BLN(Nleft > Nright);
                             case TokensType.GE:return new BLN(Nleft>=Nright);
                             case TokensType.LT:return new BLN(Nleft<Nright);

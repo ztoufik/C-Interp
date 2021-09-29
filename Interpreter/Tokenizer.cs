@@ -93,11 +93,11 @@ namespace PL.Tokenize{
 
         static private void TokensInit(){
             map[@"(^\d+(\.\d+)?)"]=TokensType.Number;
-            map[@"(^\w[\w\d]*)"]=TokensType.str;
+            map[@"(^\w[\w\d]*)"]=TokensType.Str;
             map["(^\".*?\")"]=TokensType.Qstr;
             map[@"(^=&)"]=TokensType.RefAssign;
-            map[@"(^==)"]=TokensType.Eq;
-            map[@"(^!=)"]=TokensType.NEq;
+            map[@"(^==)"]=TokensType.EQ;
+            map[@"(^!=)"]=TokensType.Neq;
             map[@"(^\>=)"]=TokensType.GE;
             map[@"(^\<=)"]=TokensType.LE;
             map[@"(^\+)"]=TokensType.Add;
@@ -106,21 +106,24 @@ namespace PL.Tokenize{
             map[@"(^\/)"]=TokensType.Div;
             map[@"(^\()"]=TokensType.LP;
             map[@"(^\))"]=TokensType.RP;
+            map[@"(^\[)"]=TokensType.LB;
+            map[@"(^\])"]=TokensType.RB;
             map[@"(^\{)"]=TokensType.Begin;
             map[@"(^\})"]=TokensType.End;
             map[@"(^;)"]=TokensType.Semi;
             map[@"(^=)"]=TokensType.Assign;
-            map[@"(^,)"]=TokensType.Colon;
+            map[@"(^:)"]=TokensType.Colon;
+            map[@"(^,)"]=TokensType.CM;
             map[@"(^\>)"]=TokensType.GT;
             map[@"(^\<)"]=TokensType.LT;
         }
 
         static private void KeyWordsInit(){
-            map[@"(^Function)"]=TokensType.Fn;
+            map[@"(^Function)"]=TokensType.FN;
             map[@"(^True)"]=TokensType.True;
             map[@"(^False)"]=TokensType.False;
             map[@"(^Loop)"]=TokensType.Loop;
-            map[@"(^If)"]=TokensType.If;
+            map[@"(^If)"]=TokensType.IF;
             map[@"(^Else)"]=TokensType.Else;
             map[@"(^Get)"]=TokensType.Get;
             map[@"(^Return)"]=TokensType.Ret;

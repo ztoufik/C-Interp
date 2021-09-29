@@ -30,7 +30,7 @@ namespace PL.Parse {
                     return ParseCompoundStatement(tokenstream);
                 case TokensType.Get:
                     return ParseGet(tokenstream);
-                case TokensType.If:
+                case TokensType.IF:
                     return ParseIf_Clause(tokenstream);
                 case TokensType.Loop:
                     return ParseLoop(tokenstream);
@@ -70,7 +70,7 @@ namespace PL.Parse {
         }
 
         static private IfClause ParseIf_Clause(TokenStream tokenstream){
-            if(!tokenstream.Eat(TokensType.If)){
+            if(!tokenstream.Eat(TokensType.IF)){
                 throw new ParserError("missing If statement");
             }
 
@@ -113,7 +113,7 @@ namespace PL.Parse {
             }
             var filename=tokenstream.Current.Value;
 
-            if(!tokenstream.Eat(TokensType.str)){
+            if(!tokenstream.Eat(TokensType.Str)){
                 throw new ParserError("invalid script file name ");
             }
             var path=Path.Join(".",filename.Value);
@@ -149,7 +149,7 @@ namespace PL.Parse {
 
             var token=tokenstream.Current.Value;
 
-            if(new TokensType[]{TokensType.Eq,TokensType.NEq,TokensType.GT,TokensType.GE,TokensType.LE,TokensType.LT}.Contains(token.type)){
+            if(new TokensType[]{TokensType.EQ,TokensType.Neq,TokensType.GT,TokensType.GE,TokensType.LE,TokensType.LT}.Contains(token.type)){
                 tokenstream.Advance();
                 rightnode=ParseAdd(tokenstream);
                 return new CmpOp(token.type,leftnode,rightnode);
@@ -210,7 +210,7 @@ namespace PL.Parse {
         static private Expr ParseParenth(TokenStream tokenstream){
             if(tokenstream.Current.Value.type==TokensType.LP){
                 tokenstream.Advance();
-                var Term=ParseExpr(tokenstream);
+                var Term=ParseAdd(tokenstream);
                 if(!tokenstream.Eat(TokensType.RP)){
                     throw new ParserError("missing )");
                 }
@@ -231,9 +231,9 @@ namespace PL.Parse {
                 case TokensType.Number: expr= new Number(double.Parse(token.Value));break;
                 case TokensType.True:expr= new BLN(true);break;
                 case TokensType.False:expr= new BLN(false);break;
-                case TokensType.str:expr= new Id(token.Value);break;
+                case TokensType.Str:expr= new Id(token.Value);break;
                 case TokensType.Qstr:expr= new Str(token.Value);break;
-                case TokensType.Fn:expr= ParseFunction(tokenstream);break;
+                case TokensType.FN:expr= ParseFunction(tokenstream);break;
                 default:throw new ParserError("invalid type");
             }
             // check for consecutive call
@@ -250,7 +250,7 @@ namespace PL.Parse {
             }
             var args=new LinkedList<Id>();
             while(tokenstream.Current.Value.type!=TokensType.RP){
-                if(tokenstream.Current.Value.type!=TokensType.str){
+                if(tokenstream.Current.Value.type!=TokensType.Str){
                     throw new ParserError("Identifier expected");
                 }
                 args.AddLast(new Id(tokenstream.Current.Value.Value));
@@ -258,7 +258,7 @@ namespace PL.Parse {
                 if(tokenstream.Count<=0){
                     throw new ParserError("missing )");
                 }
-                if(tokenstream.Current.Value.type==TokensType.Colon){
+                if(tokenstream.Current.Value.type==TokensType.CM){
                     if(tokenstream.Next.Value.type==TokensType.RP){
                         throw new ParserError("Identifier expected");
                     }
@@ -277,7 +277,7 @@ namespace PL.Parse {
             if(tokenstream.Current.Value.type!=TokensType.RP){
                 exprslist.AddLast(ParseExpr(tokenstream));
 
-                if(tokenstream.Current.Value.type==TokensType.Colon){
+                if(tokenstream.Current.Value.type==TokensType.CM){
                     tokenstream.Advance();
                     foreach(var expr in ParseCallExpr(tokenstream)){
                         exprslist.AddLast(expr);
@@ -300,7 +300,7 @@ namespace PL.Parse {
                 if(tokenstream.Count<=0){
                     throw new ParserError("missing )");
                 }
-                if(tokenstream.Current.Value.type==TokensType.Colon){
+                if(tokenstream.Current.Value.type==TokensType.CM){
                     if(tokenstream.Next.Value.type==TokensType.RP){
                         throw new ParserError("expression expected");
                     }

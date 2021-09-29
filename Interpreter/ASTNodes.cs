@@ -120,6 +120,10 @@ namespace PL.AST {
         }
     }
 
+    public class Table:ObjNode {
+        public Table(IDictionary<ObjNode,ObjNode> storage):base(storage) {}
+    }
+
     public class BLN:ObjNode {
         public BLN(bool Value):base(Value) {
         }
@@ -177,6 +181,19 @@ namespace PL.AST {
         public Call(Expr Caller,LinkedList<Expr> ArgsExprs){
             this._Caller=Caller;
             this.argsexprs=ArgsExprs;
+        }
+    }
+
+    public class Index:Expr{
+        private readonly LinkedList<KeyValuePair<Expr,Expr>> _pairs;
+        private readonly Expr _Indexer;
+
+        public LinkedList<KeyValuePair<Expr,Expr>> Pairs { get {return this._pairs;}}
+        public Expr Indexer { get {return this._Indexer;}}
+
+        public Index(Expr Indexer,LinkedList<KeyValuePair<Expr,Expr>> Pairs){
+            this._Indexer=Indexer;
+            this._pairs=Pairs;
         }
     }
 
