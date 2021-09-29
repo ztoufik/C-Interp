@@ -1,8 +1,7 @@
 using Xunit;
 using PL.Error;
 
-namespace PL.Test.InterpreterTest
-{
+namespace PL.Test.InterpreterTest {
     public class InterpreterTest {
 
         private readonly Interpreter _interpreter;

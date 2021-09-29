@@ -8,7 +8,6 @@ using PL.Error;
 
 namespace PL.Parse {
     static public class Parser{
-
         static public Program Parse(TokenStream tokenstream){
             return ParseProgram(tokenstream);
         }
@@ -225,49 +224,52 @@ namespace PL.Parse {
                 throw new ParserError("empty tokens stream");
             }
             var token=tokenstream.Current.Value;
+            Expr expr=null;
             tokenstream.Advance();
 
             switch(token.type){
-                case TokensType.Number: return new Number(double.Parse(token.Value));
-                case TokensType.True:return new BLN(true);
-                case TokensType.False:return new BLN(false);
-                case TokensType.str:{ 
-                            var id =new Id(token.Value);
-                            //if(tokenstream.Current.Value.type==TokensType.LP){
-                            //    tokenstream.Advance();
-                            //    var args=ParseCallExpr(tokenstream);
-                            //    tokenstream.Eat(TokensType.RP);
-                            //    return new Call(id,args);
-                            //}
-                            return id; }
-                case TokensType.DQ:return ParseString(tokenstream);
-                //case TokensType.Fn:return ParseFunction(tokenstream);
+                case TokensType.Number: expr= new Number(double.Parse(token.Value));break;
+                case TokensType.True:expr= new BLN(true);break;
+                case TokensType.False:expr= new BLN(false);break;
+                case TokensType.str:expr= new Id(token.Value);break;
+                case TokensType.DQ:expr= ParseString(tokenstream);break;
+                case TokensType.Fn:expr= ParseFunction(tokenstream);break;
                 default:throw new ParserError("invalid type");
             }
+            // check for consecutive call
+            while(tokenstream.Current.Value.type==TokensType.LP){
+                expr=new Call(expr,ParseArgsList(tokenstream));
+            }
+
+            return expr;
         }
 
         static private Function ParseFunction(TokenStream tokenstream){
-            if(tokenstream.Eat(TokensType.LP)){
+            if(!tokenstream.Eat(TokensType.LP)){
                 throw new ParserError("missing (");
             }
-            var ids=new LinkedList<Id>();
-            do{
-                var token=tokenstream.Current.Value;
-                if(tokenstream.Eat(TokensType.str)){
+            var args=new LinkedList<Id>();
+            while(tokenstream.Current.Value.type!=TokensType.RP){
+                if(tokenstream.Current.Value.type!=TokensType.str){
                     throw new ParserError("Identifier expected");
                 }
-                ids.AddLast(new Id(token.Value));
+                args.AddLast(new Id(tokenstream.Current.Value.Value));
+                tokenstream.Advance();
                 if(tokenstream.Count<=0){
                     throw new ParserError("missing )");
                 }
-
-            }while(tokenstream.Current.Value.type==TokensType.Colon);
-
-            if(tokenstream.Eat(TokensType.RP)){
-                throw new ParserError("missing )");
+                if(tokenstream.Current.Value.type==TokensType.Colon){
+                    if(tokenstream.Next.Value.type==TokensType.RP){
+                        throw new ParserError("Identifier expected");
+                    }
+                    tokenstream.Advance();
+                }
+            }
+            if(!tokenstream.Eat(TokensType.RP)){
+                throw new ParserError("Identifier expected");
             }
 
-            return new Function(ids,ParseCompoundStatement(tokenstream));
+            return new Function(args,ParseCompoundStatement(tokenstream));
         }
 
         static private LinkedList<Expr> ParseCallExpr(TokenStream tokenstream){
@@ -299,6 +301,29 @@ namespace PL.Parse {
             }
             tokenstream.Advance();
             return new Str(str.ToString());
+        }
+
+        static private LinkedList<Expr> ParseArgsList(TokenStream tokenstream){
+            if(!tokenstream.Eat(TokensType.LP)){
+                throw new ParserError("missing (");
+            }
+            var argslist=new LinkedList<Expr>();
+            while(tokenstream.Current.Value.type!=TokensType.RP){
+                argslist.AddLast(ParseExpr(tokenstream));
+                if(tokenstream.Count<=0){
+                    throw new ParserError("missing )");
+                }
+                if(tokenstream.Current.Value.type==TokensType.Colon){
+                    if(tokenstream.Next.Value.type==TokensType.RP){
+                        throw new ParserError("expression expected");
+                    }
+                    tokenstream.Advance();
+                }
+            }
+            if(!tokenstream.Eat(TokensType.RP)){
+                throw new ParserError("missing ')'");
+            }
+            return argslist;
         }
     }
 }

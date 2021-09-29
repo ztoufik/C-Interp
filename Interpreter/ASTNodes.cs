@@ -130,14 +130,14 @@ namespace PL.AST {
     }
 
     public class Function:ObjNode {
-        private readonly LinkedList<Id> _ids;
+        private readonly LinkedList<Id> _args;
         private readonly Compound_Statement _body;
 
-        public LinkedList<Id> Ids{get {return this._ids;}}
+        public LinkedList<Id> Args{get {return this._args;}}
         public Compound_Statement Body {get {return this._body;}}
 
         public Function(LinkedList<Id> Ids,Compound_Statement body):base(null) {
-            this._ids=Ids;
+            this._args=Ids;
             this._body=body;
         }
     }
@@ -167,15 +167,15 @@ namespace PL.AST {
     }
 
     public class Call:Expr{
-        private readonly LinkedList<Expr> _exprs;
-        private readonly Id _id;
+        private readonly LinkedList<Expr> argsexprs;
+        private readonly Expr _Caller;
 
-        public LinkedList<Expr> exprs { get {return this._exprs;}}
-        public Id id { get {return this._id;}}
+        public LinkedList<Expr> ArgsExprs { get {return this.argsexprs;}}
+        public Expr Caller { get {return this._Caller;}}
 
-        public Call(Id id,LinkedList<Expr> Exprs){
-            this._id=id;
-            this._exprs=Exprs;
+        public Call(Expr Caller,LinkedList<Expr> ArgsExprs){
+            this._Caller=Caller;
+            this.argsexprs=ArgsExprs;
         }
     }
 
