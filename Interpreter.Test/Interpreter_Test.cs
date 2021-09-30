@@ -125,6 +125,19 @@ namespace PL.Test.InterpreterTest {
         }
 
         [Theory]
+        [InlineData("b=[3:18];a=b[3];",18,"a")]
+        [InlineData("b=[\"true\":True];a=b[\"true\"];",true,"a")]
+        [InlineData("b=[0:\"Zero\",1:\"One\"];a=b[0];","\"Zero\"","a")]
+        [InlineData("a=[\"key\":Function(b){Return b;}][\"key\"](\"value\");","\"value\"","a")]
+        [InlineData("b=[];b[3]=13;a=b[3];",13,"a")]
+        [InlineData("b=[];b[\"test\"]=13;a=b[\"test\"];",13,"a")]
+        [InlineData("b=[];If(True){b[3]=&13;};a=b[3];",13,"a")]
+        public void Test_TableIndexing(string input,object expected,string varname) {
+            var result=setup(input,varname);
+            Assert.Equal(expected.ToString(),result.ToString());
+        }
+
+        [Theory]
         [InlineData("a=3;Function(){a=&4;}();",4,"a")]
         [InlineData("a=3;Function(b){a=&b;}(4);",4,"a")]
         [InlineData("a=3;b=Function(b,c){a=&b+c;};b(4,1+3);",8,"a")]

@@ -6,8 +6,7 @@ using PL.AST;
 using PL.Parse;
 using PL.Tokenize;
 
-namespace PL.Test.ParserTest
-{
+namespace PL.Test.ParserTest {
     public class Parser_Test {
         private Program SetupParsing(string input){
             return Parser.Parse(Tokenizer.TokenizeString(input));
@@ -94,6 +93,16 @@ namespace PL.Test.ParserTest
         }
 
         [Theory]
+        [InlineData("[3:4];",typeof(TableExpr))]
+        [InlineData("[3:4,\"toufik\":True];",typeof(TableExpr))]
+        [InlineData("[];",typeof(TableExpr))]
+        public void Test_TableExpr(string input,Type expected)
+        {
+            var programast=SetupParsing(input);
+            var node=programast.StmtList.First();
+            Assert.IsAssignableFrom(expected,node);
+        }
+        [Theory]
         [InlineData("a();",typeof(Call))]
         [InlineData("b()();",typeof(Call))]
         [InlineData("Function (){a3;}();",typeof(Call))]
@@ -104,6 +113,17 @@ namespace PL.Test.ParserTest
         [InlineData("b(b,a)(c,d);",typeof(Call))]
         [InlineData("Function (){a3;}(a,b);",typeof(Call))]
         public void Test_Call(string input,Type expected)
+        {
+            var programast=SetupParsing(input);
+            var node=programast.StmtList.First();
+            Assert.IsAssignableFrom(expected,node);
+        }
+
+        [Theory]
+        [InlineData("a[3];",typeof(TIndex))]
+        [InlineData("a()[3];",typeof(TIndex))]
+        [InlineData("[3:5][3];",typeof(TIndex))]
+        public void Test_Index(string input,Type expected)
         {
             var programast=SetupParsing(input);
             var node=programast.StmtList.First();
@@ -188,11 +208,18 @@ namespace PL.Test.ParserTest
         [InlineData("Function ){a3;};")]
         [InlineData("Function (a,){a3;};")]
         [InlineData("Function (,a){a3;};")]
+        [InlineData("Function (b a){a3;};")]
+        [InlineData("[3:3;")]
+        [InlineData("3:3];")]
+        [InlineData("[3:3,];")]
+        [InlineData("[3:3 4:3];")]
         [InlineData("a(;")]
         [InlineData("a);")]
         [InlineData("b(,a)(c,d);")]
         [InlineData("Function (){a3;}(a,);")]
         [InlineData("Return ;")]
+        [InlineData("a[];")]
+        [InlineData("[3:5][];")]
         public void Test_ParseError(string input)
         {
             Assert.Throws<ParserError>(()=>SetupParsing(input));

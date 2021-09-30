@@ -31,6 +31,7 @@ namespace PL.AST {
         public override string ToString(){
             return this.Value.ToString();
         }
+
     }
 
     // types
@@ -43,8 +44,17 @@ namespace PL.AST {
             return this.Value.GetHashCode();
         }
 
+        public bool Equals(Number other){
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ((double)Value)==((double)other.Value);
+        }
+
         public override bool Equals(object obj){
-            return this.Equals(obj);
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (Number)) return false;
+            return Equals((Number) obj);
         }
 
         static public Number operator +(Number own,Number other){
@@ -112,25 +122,83 @@ namespace PL.AST {
         public Str(string Value):base(Value) {
         }
 
+        public override int GetHashCode(){
+            return this.Value.GetHashCode();
+        }
+
+        public bool Equals(Str other){
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ((string)Value)==((string)other.Value);
+        }
+
+        public override bool Equals(object obj){
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (Str)) return false;
+            return Equals((Str) obj);
+        }
+
         static public Str operator +(Str own,Str other){
             var firststring=own.Value as string;
             var secondstring=other.Value as string;
             var concat='"'+firststring.Trim('"')+secondstring.Trim('"')+'"';
             return new Str(concat);
         }
+
+        static public bool operator ==(Str own,Str other){
+            string Own=(string)own.Value;
+            string Other=(string)other.Value;
+            return Own == Other;
+        }
+
+        static public bool operator !=(Str own,Str other){
+            string Own=(string)own.Value;
+            string Other=(string)other.Value;
+            return Own != Other;
+        }
     }
 
     public class Table:ObjNode {
-        public Table(IDictionary<ObjNode,ObjNode> storage):base(storage) {}
+        private readonly Dictionary<ObjNode,ObjNode> _dict;
+        public Table(Dictionary<ObjNode,ObjNode> storage):base(storage) {
+            this._dict=(Dictionary<ObjNode,ObjNode>)this.Value;
+        }
+
+        public ObjNode this[ObjNode key]{
+            get =>_dict.ContainsKey(key)? this._dict[key] : null; 
+            set =>this._dict[key]=value;
+        }
     }
 
     public class BLN:ObjNode {
         public BLN(bool Value):base(Value) {
         }
+
+        public override int GetHashCode(){
+            return this.Value.GetHashCode();
+        }
+
+        public bool Equals(BLN other){
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return ((bool)this.Value)==((bool)other.Value);
+        }
+
+        public override bool Equals(object obj){
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (bool)) return false;
+            return Equals((bool) obj);
+        }
     }
 
     public class Null:ObjNode {
         public Null():base(null) {
+        }
+
+        public override string ToString(){
+            return "Null ObjNode type";
         }
     }
 
@@ -145,7 +213,17 @@ namespace PL.AST {
             this._args=Ids;
             this._body=body;
         }
+
+        public override int GetHashCode(){
+            return this.Value.GetHashCode();
+        }
+
+        public override bool Equals(object obj){
+            return this==(Function)obj;
+        }
     }
+
+    // Binary operations
 
     abstract public class BinOp:Expr {
         protected readonly Expr _left;
@@ -178,22 +256,32 @@ namespace PL.AST {
         public LinkedList<Expr> ArgsExprs { get {return this.argsexprs;}}
         public Expr Caller { get {return this._Caller;}}
 
-        public Call(Expr Caller,LinkedList<Expr> ArgsExprs){
+        public Call(Expr Caller,LinkedList<Expr> ArgsExprs):base(){
             this._Caller=Caller;
             this.argsexprs=ArgsExprs;
         }
     }
 
-    public class Index:Expr{
-        private readonly LinkedList<KeyValuePair<Expr,Expr>> _pairs;
+    public class TableExpr:Expr{
+        private readonly LinkedList<KeyValuePair<Expr,Expr>> _exprslist;
+
+        public LinkedList<KeyValuePair<Expr,Expr>> ExprsList { get {return this._exprslist;}}
+
+        public TableExpr(LinkedList<KeyValuePair<Expr,Expr>> ExprsList):base(){
+            this._exprslist=ExprsList;
+        }
+    }
+
+    public class TIndex:Expr{
+        private readonly Expr _index;
         private readonly Expr _Indexer;
 
-        public LinkedList<KeyValuePair<Expr,Expr>> Pairs { get {return this._pairs;}}
+        public Expr Index { get {return this._index;}}
         public Expr Indexer { get {return this._Indexer;}}
 
-        public Index(Expr Indexer,LinkedList<KeyValuePair<Expr,Expr>> Pairs){
+        public TIndex(Expr Indexer,Expr Index){
             this._Indexer=Indexer;
-            this._pairs=Pairs;
+            this._index=Index;
         }
     }
 
@@ -250,26 +338,26 @@ namespace PL.AST {
     // statements
 
     public class Assign:Statement {
-        private Id _id;
+        private Expr _id;
         private Expr _expr;
 
-        public Id Id {get {return _id;}}
+        public Expr Id {get {return _id;}}
         public Expr expr {get {return _expr;}}
 
-        public Assign(Id id,Expr expr):base() {
+        public Assign(Expr id,Expr expr):base() {
             this._id=id;
             this._expr=expr;
         }
     }
 
     public class RefAssign:Statement {
-        private Id _id;
+        private Expr _id;
         private Expr _expr;
 
-        public Id Id {get {return _id;}}
+        public Expr Id {get {return _id;}}
         public Expr expr {get {return _expr;}}
 
-        public RefAssign(Id id,Expr expr):base() {
+        public RefAssign(Expr id,Expr expr):base() {
             this._id=id;
             this._expr=expr;
         }

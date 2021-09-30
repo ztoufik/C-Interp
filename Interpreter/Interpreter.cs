@@ -52,20 +52,52 @@ namespace PL {
         }
 
         private void VisitAssign(Assign assign){
-            this._currentscope[assign.Id.VarName]=VisitExpr(assign.expr);
+            switch(assign.Id){
+                case Id id: this._currentscope[id.VarName]=VisitExpr(assign.expr);break;
+                case TIndex tindex: {
+                                        Table table=VisitExpr(tindex.Indexer) as Table;
+                                        if(table is null){
+                                            throw new ExecuteError("can't index Null objec");
+                                        }
+                                        ObjNode index=VisitExpr(tindex.Index);
+                                        if(index is Null){
+                                            throw new ExecuteError("can't index Null objec");
+                                        }
+                                        table[index]=VisitExpr(assign.expr);
+
+                                    }break;
+                default:throw new ExecuteError("invalid expression to assign to ");
+            }
         }
 
         private void VisitRefAssign(RefAssign refassign){
             ObjNode Value=VisitExpr(refassign.expr);
-            Scope scope=this._currentscope.Parent;
-            while(!(scope is null)){
-                if(!(scope[refassign.Id.VarName] is null)){
-                    scope[refassign.Id.VarName]=Value;
-                    return;
-                }
-                scope=scope.Parent;
+            switch(refassign.Id){
+                case Id id: {
+                                Scope scope=this._currentscope.Parent;
+                                while(!(scope is null)){
+                                    if(!(scope[id.VarName] is null)){
+                                        scope[id.VarName]=Value;
+                                        return;
+                                    }
+                                    scope=scope.Parent;
+                                }
+                                throw new ExecuteError("referenced variable is not identified");
+                            }
+                case TIndex tindex: {
+                                        Table table=VisitExpr(tindex.Indexer) as Table;
+                                        if(table is null){
+                                            throw new ExecuteError("can't index Null");
+                                        }
+                                        ObjNode index=VisitExpr(tindex.Index);
+                                        if(index is Null){
+                                            throw new ExecuteError("index value can't be Null");
+                                        }
+                                        table[index]=VisitExpr(refassign.expr);
+
+                                    }break;
+                default:throw new ExecuteError("invalid expression to assign to ");
             }
-            throw new ExecuteError("referenced variable is not identified");
         }
 
         private void VisitIfClause(IfClause if_clause){
@@ -92,7 +124,7 @@ namespace PL {
             }
             funcscope.Return=VisitExpr(ret.expr);
         }
-         
+
         private void VisitLoop(Loop loop){
             Scope localscope=new Scope(this._currentscope);
             this._currentscope=localscope;
@@ -112,6 +144,12 @@ namespace PL {
             switch(expr){
                 case Id id:
                     return VisitId(id);
+
+                case TableExpr tableexpr:
+                    return VisitTableExpr(tableexpr);
+
+                case TIndex tindex:
+                    return VisitIndex(tindex);
 
                 case BinOp binop:
                     return VisitBinOp(binop);
@@ -204,6 +242,27 @@ namespace PL {
                 throw new ExecuteError("indefined identifier");
             }
             return Value;
+        }
+
+        private ObjNode VisitIndex(TIndex index){
+            var table=VisitExpr(index.Indexer) as Table;
+            if(table is null){
+                throw new ExecuteError("invalid table expression");
+            }
+            ObjNode indexvalue=VisitExpr(index.Index);
+            if(indexvalue is Null){
+                throw new ExecuteError("index value can't be null");
+            }
+            var objnode=table[indexvalue];
+            return  objnode is null?new Null():VisitExpr(objnode);
+        }
+
+        private Table VisitTableExpr(TableExpr tableexpr){
+            var dict=new Dictionary<ObjNode,ObjNode>();
+            foreach(var exprpair in tableexpr.ExprsList){
+                dict.Add(VisitExpr(exprpair.Key),VisitExpr(exprpair.Value));
+            }
+            return new Table(dict);
         }
 
         private ObjNode LookUp(string key,Scope scope){

@@ -45,6 +45,12 @@ namespace PL.Tokenize{
             _count++;
         }
 
+        public Token Pop(){
+            var token=this._cursor.Value;
+            this.Advance();
+            return token;
+        }
+
         public bool Eat(TokensType tokentype){
             if(this.Current?.type==tokentype){
                 this.Advance();

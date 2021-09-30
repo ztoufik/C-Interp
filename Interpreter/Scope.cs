@@ -9,9 +9,7 @@ namespace PL {
         public Scope Parent {get {return this._parent;}}
 
         public ObjNode this[string key]{
-            get {
-                if(this._dict.Keys.Contains(key)){ return this._dict[key]; }
-                return null; }
+            get => this._dict.Keys.Contains(key)?this._dict[key]: null;
             set =>this._dict[key]=value;
         }
 
